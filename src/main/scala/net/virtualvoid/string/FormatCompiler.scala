@@ -147,29 +147,10 @@ object Compiler{
          .method(_.toString)
      )
   }
-  case class Bank(n:String){
-    def name():jString = n
-  }
-  case class Account(n:String,b:Bank) {
-    def number():jString = n
-    def bank() = b
-  }
-  class Person{
-      def name():java.lang.String = "Joe"
-      def accountNames():java.util.List[java.lang.String] = java.util.Arrays.asList("a","b")
-      val sparkasse = Bank("Sparkasse")
-      def accounts():java.util.List[Account] = java.util.Arrays.asList(Account("78910",sparkasse),Account("12345",Bank("Volksbank")))
-      def accs():Array[Account] = accounts().toArray(new Array[Account](0))
-  }
-  def main(args:Array[String]){
-    def output(format:String) = System.out.println(compile(format,classOf[Person])(new Person))
-    output("Name: #name Accounts: ")
-    output("Name: #name Accounts: #accountNames{,}*")
-    output("Name: #name Accounts: #accounts[#number]{, }*")
-    output("Name: #name Accounts: #accounts[#number(#bank.name)]{, }*")
-    output("Name: #name Accounts: #accs[#number(#bank.name)]{, }*")
-    val p = new Person
-    System.out.println(compile[Array[Account]]("#this[#number(#bank.name)]{, }*",p.accs.getClass.asInstanceOf[Class[Array[Account]]])(p.accs))
-    System.out.println(compile[java.lang.Iterable[Account]]("#this[#number(#bank.name)]{, }*",p.accounts.getClass.asInstanceOf[Class[java.lang.Iterable[Account]]])(p.accounts))
+}
+
+object FormatCompiler extends IObjectFormatterFactory{
+  def formatter[T<:AnyRef](fmt:String):IObjectFormatter[T] = new IObjectFormatter[T]{
+    def format(o:T):String = Compiler.compile[T](fmt,o.getClass.asInstanceOf[Class[T]])(o)
   }
 }

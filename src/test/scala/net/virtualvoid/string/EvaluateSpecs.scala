@@ -21,13 +21,13 @@ object EvaluateSpecs extends Specification{
   }
   val thePerson = new Person
 
-  import matcher.Matcher
-  def evaluateAs(str:String) = new Matcher[String]{
-    def apply(format: =>String) =
-      (ObjectFormatter.format(format,thePerson) == str,"evaluates as "+str,"does not evaluate as "+str)
-  }
+  def evaluate(factory:IObjectFormatterFactory){
+    import matcher.Matcher
+    def evaluateAs(str:String) = new Matcher[String]{
+      def apply(format: =>String) =
+        (factory.format(format,thePerson) == str,"evaluates as "+str,"does not evaluate as "+str)
+    }
 
-  "Format" should {
     "literal" in {"literal" must evaluateAs("literal")}
     "property access" in {"#name" must evaluateAs(thePerson.name)}
     "string array access" in {"#accountNames*" must evaluateAs("ab")}
@@ -35,6 +35,13 @@ object EvaluateSpecs extends Specification{
     "object iterable access with inner expression" in {"#accounts[#number]{,}*" must evaluateAs("78910,12345")}
     "object array access with inner expression" in {"#accs[#number]{,}*" must evaluateAs("78910,12345")}
     "deep property access" in {"#accs[#bank.name]{,}*" must evaluateAs("Sparkasse,Volksbank")}
+  }
+
+  "The format interpreter" should {
+    evaluate(ObjectFormatter)
+  }
+  "The format compiler" should {
+    evaluate(ObjectFormatter)
   }
 }
 
