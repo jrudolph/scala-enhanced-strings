@@ -52,6 +52,8 @@ object ParserSpecs extends Specification {
   }
 }
 
+class ParserSpecsJUnit4 extends runner.JUnit4(ParserSpecs)
+
 /* Code awaiting testing
 trait IAccount{
   def getBank():String
