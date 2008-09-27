@@ -15,8 +15,8 @@ object TypeHelper {
         case v:TypeVariable[_] => tp(v.getGenericDeclaration.asInstanceOf[Class[_]].getTypeParameters.indexOf(v))
       }).toArray
 
-    System.out.println(cl)
-    if (cl == cand) Some(tp(0))
+    if (cl == cand)
+      Some(tp(0))
     else
       cl match{
         case p:ParameterizedType => {
