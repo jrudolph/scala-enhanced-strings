@@ -3,6 +3,9 @@ package net.virtualvoid.string
 import _root_.org.specs._
 
 object ParserSpecs extends Specification {
+  import EnhancedStringFormatParser.{parse,lexical}
+  import lexical._
+
   "The parser" should parseCorrectly {
     "'test'" in {"test" must beParsedAs(Literal("test"))}
     "'#prop'" in {"#prop" must beParsedAs(Exp("prop"))}
@@ -35,8 +38,6 @@ object ParserSpecs extends Specification {
   }
 
   // helper methods
-  import EnhancedStringFormatParser.{parse,lexical}
-  import lexical._
 
   import org.specs.matcher.Matcher
   def beParsedAs(ts:StrToken*) = new Matcher[String]{
