@@ -3,23 +3,6 @@ package net.virtualvoid.string
 import _root_.org.specs._
 
 object ParserSpecs extends Specification {
-
-  import EnhancedStringFormatParser.{parse,lexical}
-  import lexical._
-
-  import org.specs.matcher.Matcher
-  def beParsedAs(ts:StrToken*) = new Matcher[String]{
-    val tokens = List(ts:_*)
-    def apply(str: => String) = {
-      val l = parse(str)
-      (l.toString == tokens.toString,"equal",l.toString + " is not equal to the expected " + tokens.toString)
-    }
-  }
-  def splice(e:Exp,sep:String,inner:StrToken*) = SpliceExp(e,sep,List(inner:_*))
-
-  import org.specs.specification.Example
-  def parseCorrectly(e: =>Example) = { currentSut.verb += " parse correctly"; e }
-
   "The parser" should parseCorrectly {
     "'test'" in {"test" must beParsedAs(Literal("test"))}
     "'#prop'" in {"#prop" must beParsedAs(Exp("prop"))}
@@ -50,32 +33,23 @@ object ParserSpecs extends Specification {
 
     "Curly Braces somewhere in between 'This is {braced}'" in {"This is {braced}" must beParsedAs(Literal("This is {braced}"))}
   }
+
+  // helper methods
+  import EnhancedStringFormatParser.{parse,lexical}
+  import lexical._
+
+  import org.specs.matcher.Matcher
+  def beParsedAs(ts:StrToken*) = new Matcher[String]{
+    val tokens = List(ts:_*)
+    def apply(str: => String) = {
+      val l = parse(str)
+      (l.toString == tokens.toString,"equal",l.toString + " is not equal to the expected " + tokens.toString)
+    }
+  }
+  def splice(e:Exp,sep:String,inner:StrToken*) = SpliceExp(e,sep,List(inner:_*))
+
+  import org.specs.specification.Example
+  def parseCorrectly(e: =>Example) = { currentSut.verb += " parse correctly"; e }
 }
 
 class ParserSpecsJUnit4 extends runner.JUnit4(ParserSpecs)
-
-/* Code awaiting testing
-trait IAccount{
-  def getBank():String
-  def getAccountNo():String
-  def getOwner():IPerson
-}
-trait IPerson{
-  def getFirstName():String
-  def getLastName():String
-  def getAccounts():java.util.List[IAccount]
-}
-case class Account(nummer:String,bank:String,owner:IPerson) extends IAccount{
-  def getBank:String = bank
-  def getAccountNo:String = nummer
-  def getOwner:IPerson = owner
-}
-object Peter extends IPerson{
-  def getFirstName:String = "Peter"
-  def getLastName:String = "Paul"
-  def getAccounts():java.util.List[IAccount] =
-    java.util.Arrays.asList(Array(Account("234234","Rich Bank Berlin",this),Account("3424234","Park Bank",this)))
-}
-System.out.println(eval("Name: #firstName #lastName\nAccounts:\n#accounts[#accountNo at #bank](\n)*",Peter))
-System.out.println(eval("#this[#this has the length #length and consists of the chars #toCharArray['#this'](,)*](\n)*",Array("test","long string")))
-*/
