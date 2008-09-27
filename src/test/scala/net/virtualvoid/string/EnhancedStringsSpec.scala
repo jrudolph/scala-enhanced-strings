@@ -1,6 +1,6 @@
 package net.virtualvoid.string
 
-import org.specs._
+import _root_.org.specs._
 
 object ParserSpecs extends Specification {
 
