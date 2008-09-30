@@ -41,7 +41,7 @@ object EvaluateSpecs extends Specification{
     evaluate(ObjectFormatter)
   }
   "The format compiler" should {
-    evaluate(ObjectFormatter)
+    evaluate(FormatCompiler)
   }
 }
 
