@@ -3,7 +3,8 @@ package net.virtualvoid.string
 import java.lang.{StringBuilder,String=>jString}
 
 object Compiler{
-  import net.virtualvoid.bytecode.v2.Bytecode
+  import net.virtualvoid.bytecode.Bytecode
+  import net.virtualvoid.bytecode.ASMCompiler
   import Bytecode._
   import Bytecode.Implicits._
 
