@@ -6,6 +6,7 @@ object Compiler{
   import net.virtualvoid.bytecode.Bytecode
   import net.virtualvoid.bytecode.ASMCompiler
   import Bytecode._
+  import Bytecode.Operations._
   import Bytecode.Implicits._
 
   val parser = EnhancedStringFormatParser
@@ -21,8 +22,8 @@ object Compiler{
   def compileGetExp[R<:List,LR<:List,T,Ret](exp:Exp,cl:Class[T],retType:Class[Ret])(f:F[R**T,LR]):F[R**Ret,LR] = exp match{
     case p@ParentExp(inner,parent) =>{
       val m = p.method(cl)
-      f.dynMethod(m,classOf[AnyRef])
-       .op(compileGetExp(inner,m.getReturnType.asInstanceOf[Class[Object]],retType))
+      f.dynMethod(m,classOf[AnyRef]) ~ 
+       (compileGetExp(inner,m.getReturnType.asInstanceOf[Class[Object]],retType))
     }
     case ThisExp =>
       f.checkcast(retType) // TODO: don't know why we need this, examine it
@@ -35,9 +36,9 @@ object Compiler{
     = tok match {
       case Literal(str) => f.ldc(str).method2(_.append(_))
       case e:Exp =>
-        f.l.load.e
-         .op(compileGetExp(e,cl,classOf[AnyRef]))
-         .method(_.toString)
+        (f.l.load.e
+         ~ compileGetExp(e,cl,classOf[AnyRef])
+         ~ method(_.toString))
          .method2(_.append(_))
       case SpliceExp(exp,sep,inner) => {
         val retType = exp.returnType(cl)
@@ -48,7 +49,7 @@ object Compiler{
             f.l.load.e
              .swap // save one instance of T for later
              .l.load.e
-             .op(compileGetExp(exp,cl,classOf[java.lang.Iterable[AnyRef]]))
+             .~(compileGetExp(exp,cl,classOf[java.lang.Iterable[AnyRef]]))
              .method(_.iterator)
              .l.store.e
              .target
@@ -62,7 +63,7 @@ object Compiler{
                 .method(_.next)
                 .checkcast(eleType)
                 .l.store.e
-                .op(compileToks(inner,eleType))
+                .~(compileToks(inner,eleType))
                 .swap
                 .dup
                 .l.store.e
@@ -85,7 +86,7 @@ object Compiler{
             f.l.load.e
              .swap
              .l.load.e
-             .op(compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]))
+             .~(compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]))
              .l.store.e
              .bipush(0)
              .target
@@ -105,12 +106,12 @@ object Compiler{
               .swap
               .l.store.e
               .swap
-              .op(compileToks(inner,eleType))
+              .~(compileToks(inner,eleType))
               .swap
               .l.store.e
               .swap
               .bipush(1) // TODO: better use iinc
-              .iadd
+              .~(iadd)
               .dup
               .l.load.e
               .arraylength
@@ -144,7 +145,7 @@ object Compiler{
      f =>
        f.l.store.e
          .newInstance(classOf[StringBuilder])
-         .op(compileToks(toks,cl))
+         .~(compileToks(toks,cl))
          .method(_.toString)
      )
   }
