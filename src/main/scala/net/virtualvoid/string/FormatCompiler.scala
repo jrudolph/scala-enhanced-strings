@@ -23,10 +23,10 @@ object Compiler{
     case p@ParentExp(inner,parent) =>{
       val m = p.method(cl)
       f.dynMethod(m,classOf[AnyRef]) ~ 
-       (compileGetExp(inner,m.getReturnType.asInstanceOf[Class[Object]],retType))
+       compileGetExp(inner,m.getReturnType.asInstanceOf[Class[Object]],retType)
     }
     case ThisExp =>
-      f.checkcast(retType) // TODO: don't know why we need this, examine it
+      f.~(checkcast(retType)) // TODO: don't know why we need this, examine it
     case e:Exp => {
       f.dynMethod(e.method(cl),retType)
     }
@@ -36,45 +36,45 @@ object Compiler{
     = tok match {
       case Literal(str) => f.ldc(str).method2(_.append(_))
       case e:Exp =>
-        (f.l.load.e
-         ~ compileGetExp(e,cl,classOf[AnyRef])
-         ~ method(_.toString))
-         .method2(_.append(_))
+        f ~ (_.l.load.e) ~ 
+          compileGetExp(e,cl,classOf[AnyRef]) ~ 
+          method(_.toString) ~ 
+          method2(_.append(_))
       case SpliceExp(exp,sep,inner) => {
         val retType = exp.returnType(cl)
 
         if (classOf[java.lang.Iterable[_]].isAssignableFrom(retType)){
           val eleType:Class[AnyRef] = elementType(exp.genericReturnType(cl)).asInstanceOf[Class[AnyRef]]
           val jmpTarget =
-            f.l.load.e
-             .swap // save one instance of T for later
-             .l.load.e
-             .~(compileGetExp(exp,cl,classOf[java.lang.Iterable[AnyRef]]))
-             .method(_.iterator)
-             .l.store.e
-             .target
-          jmpTarget
-             .l.load.e
-             .method(_.hasNext)
-             .ifeq(f=>
-               f.l.load.e
-                .swap
-                .l.load.e
-                .method(_.next)
-                .checkcast(eleType)
-                .l.store.e
-                .~(compileToks(inner,eleType))
-                .swap
-                .dup
-                .l.store.e
-                .method(_.hasNext)
-                .ifeq(f =>
-                   f.ldc(sep:jString)
-                    .method2(_.append(_))
-                    .jmp(jmpTarget)) //todo: introduce ifeq(thenCode,elseTarget)
-                .jmp(jmpTarget))
-             .swap
-             .l.store.e
+            f ~ (_.l.load.e) ~
+             swap ~ // save one instance of T for later
+             (_.l.load.e) ~
+             compileGetExp(exp,cl,classOf[java.lang.Iterable[AnyRef]]) ~
+             method(_.iterator) ~
+             (_.l.store.e) ~
+             target
+          jmpTarget ~
+             (_.l.load.e) ~
+             method(_.hasNext) ~
+             ifeq(f =>
+               f.l.load.e ~
+                swap ~
+                (_.l.load.e) ~
+                method(_.next) ~
+                checkcast(eleType) ~
+                (_.l.store.e) ~
+                compileToks(inner,eleType) ~
+                swap ~
+                dup ~
+                (_.l.store.e) ~
+                method(_.hasNext) ~
+                ifeq(f =>
+                   f~ldc(sep:jString) ~
+                    method2(_.append(_)) ~
+                    jmp(jmpTarget)) ~ //todo: introduce ifeq(thenCode,elseTarget)
+                jmp(jmpTarget)) ~
+             swap ~
+             (_.l.store.e)
         }
         else if (retType.isArray){
           val eleType:Class[AnyRef] = retType.getComponentType.asInstanceOf[Class[AnyRef]]
@@ -97,7 +97,7 @@ object Compiler{
            .arraylength
            .swap
            .isub
-           .ifeq(f =>
+           .~(ifeq(f =>
              f.dup_x1
               .l.load.e
               .swap
@@ -116,15 +116,15 @@ object Compiler{
               .l.load.e
               .arraylength
               .isub
-              .ifeq(f=>
+              .~(ifeq(f =>
                  f.swap
                   .ldc(sep)
                   .method2(_.append(_))
                   .swap
                   .jmp(jmpTarget)
-              )
+              ))
               .jmp(jmpTarget)
-           )
+           ))
            .pop
            .swap
            .l.store.e
