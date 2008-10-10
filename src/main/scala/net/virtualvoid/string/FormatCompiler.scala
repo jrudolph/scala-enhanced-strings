@@ -138,7 +138,7 @@ object Compiler{
       case Conditional(inner,ifs,thens) => {
         val retType = inner.returnType(cl)
         
-        var target:ForwardTarget[R**StringBuilder,LR**T] = f.forwardTarget
+        val target:ForwardTarget[R**StringBuilder,LR**T] = f.forwardTarget
         
         f.l.load.e
          .op(f => if (retType.isPrimitive)
