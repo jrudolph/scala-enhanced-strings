@@ -151,7 +151,7 @@ object Compiler{
 }
 
 object FormatCompiler extends IObjectFormatterFactory{
-  def formatter[T<:AnyRef](fmt:String):IObjectFormatter[T] = new IObjectFormatter[T]{
-    def format(o:T):String = Compiler.compile[T](fmt,o.getClass.asInstanceOf[Class[T]])(o)
+  def formatter[T<:AnyRef](clazz:Class[T],fmt:String):IObjectFormatter[T] = new IObjectFormatter[T]{
+    def format(o:T):String = Compiler.compile[T](fmt,clazz)(o)
   }
 }
