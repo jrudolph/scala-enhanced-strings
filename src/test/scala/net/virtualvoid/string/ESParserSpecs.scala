@@ -38,6 +38,9 @@ object ParserSpecs extends Specification {
     
     // conversions
     "date conversion" in {"#this->date[dd.MM.yyyy]" must beParsedAs(DateConversion(ThisExp,"dd.MM.yyyy"))}
+    
+    // conditionals
+    "conditionals" in {"#this?[#this|Nope]" must beParsedAs(Conditional(ThisExp,List(ThisExp),List(Literal("Nope"))))}
   }
 
   // helper methods

@@ -11,6 +11,7 @@ object EvaluateSpecs extends Specification{
   import java.util.Calendar._
   case class Transaction(date:GregorianCalendar,centAmount:Int){
     def isWithdrawal() = centAmount < 0
+    def amount() = Math.abs(centAmount)
   }
   case class Account(n:String,b:Bank) {
     def number():jString = n
@@ -44,6 +45,7 @@ object EvaluateSpecs extends Specification{
     "object array access with inner expression" in {"#accs[#number]{,}*" must evaluateAs("78910,12345")}
     "deep property access" in {"#accs[#bank.name]{,}*" must evaluateAs("Sparkasse,Volksbank")}
     "format dates properly" in {"#this->date[dd.MM.yyyy]" must evaluateObjectAs(new GregorianCalendar(2008,OCTOBER,1),"01.10.2008")}
+    "evaluate conditionals" in {"#this?[true|false]" must evaluateObjectAs(java.lang.Boolean.valueOf(false),"false")}
   }
 
   "The format interpreter" should {
@@ -60,7 +62,7 @@ object Test{
     System.out.println(ObjectFormatter.format(
 """#name has these bank accounts:
   #accs[#number at #bank.name having these transactions:
-    #transactions[#centAmount at #date->date[dd.MM.yyyy]]{
+    #transactions[#isWithdrawal?[Withdrawal: #amount|Deposit: #amount] Euros at #date->date[dd.MM.yyyy]]{
     }*]{
   }*
 """,EvaluateSpecs.thePerson))

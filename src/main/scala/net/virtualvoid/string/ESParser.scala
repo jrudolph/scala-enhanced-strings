@@ -45,6 +45,16 @@ class StrLexer extends Lexical with RegexParsers{
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
     def eval(o:AnyRef) = method(o.getClass).invoke(o,null)
   }
+  case class Conditional(condition:Exp,ifToks:List[StrToken],thenToks:List[StrToken]) extends StrToken{
+    def chars =""
+    def eval(o:AnyRef) = { // TODO: we could be much shorter using the Boolean monad or something like that 
+      def evalToks(toks:List[StrToken]) = toks.map(_.eval(o)) mkString ""
+      condition.eval(o) match {
+        case java.lang.Boolean.TRUE => evalToks(ifToks)
+        case java.lang.Boolean.FALSE => evalToks(thenToks)
+      }
+    }
+  }
   case class DateConversion(exp:Exp,format:String) extends StrToken{
     val df = new java.text.SimpleDateFormat(format)
     def eval(o:AnyRef) = df.format(exp.eval(o) match {
@@ -79,7 +89,7 @@ class StrLexer extends Lexical with RegexParsers{
 
   val expStartChar = '#'
 
-  def char = "[^#\\]\\[]".r | escapedByDoubling("[") | escapedByDoubling("]") | escapedByDoubling("#")
+  def char = "[^#\\]|\\[]".r | escapedByDoubling("[") | escapedByDoubling("]") | escapedByDoubling("#") | escapedByDoubling("|")
   def idChar = "\\w".r
   def lit:Parser[StrToken] = char ~ rep(char) ^^ {case first ~ rest => Literal(first :: rest reduceLeft (_+_))}
 
@@ -97,8 +107,12 @@ class StrLexer extends Lexical with RegexParsers{
   
   def dateConversion:Parser[String] = extendParser("->date[") ~!> "[^\\]]*".r <~ "]" 
   def conversion = exp ~ dateConversion ^^ {case exp ~ format => DateConversion(exp,format)}
+  
+  def clauses = extendParser("?[") ~!> 
+    (rep(innerExp) ~ "|" ~ rep(innerExp) <~ "]")
+  def conditional = exp ~ clauses ^^ {case exp ~ (ifs ~ sep ~ thens) => Conditional(exp,ifs,thens)}
 
-  def innerExp:Parser[StrToken] = spliceExp | conversion | exp | lit 
+  def innerExp:Parser[StrToken] = spliceExp | conversion | conditional | exp | lit 
   def inners = '[' ~> rep(innerExp) <~ ']'
 
   import scala.util.parsing.input.CharArrayReader.EofCh
