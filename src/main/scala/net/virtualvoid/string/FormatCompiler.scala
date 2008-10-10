@@ -34,11 +34,15 @@ object Compiler{
   def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:StrToken,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = tok match {
       case Literal(str) => f.ldc(str).method2(_.append(_))
-      case e:Exp =>
+      case e:Exp => {
+        if (e.returnType(cl).isPrimitive)
+          throw new java.lang.Error("currently no primitives can be put out directly problematic expression: "+e.identifier)
+        
         f.l.load.e
          .op(compileGetExp(e,cl,classOf[AnyRef]))
          .method(_.toString)
          .method2(_.append(_))
+      }
       case SpliceExp(exp,sep,inner) => {
         val retType = exp.returnType(cl)
 
