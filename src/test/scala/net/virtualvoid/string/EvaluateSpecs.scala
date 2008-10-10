@@ -3,14 +3,19 @@ package net.virtualvoid.string
 import _root_.org.specs._
 
 object EvaluateSpecs extends Specification{
-
   import java.lang.{String=>jString}
   case class Bank(n:String){
     def name():jString = n
   }
+  import java.util.GregorianCalendar
+  import java.util.Calendar._
+  case class Transaction(date:GregorianCalendar,centAmount:Int){
+    def isWithdrawal() = centAmount < 0
+  }
   case class Account(n:String,b:Bank) {
     def number():jString = n
     def bank() = b
+    def transactions():Array[Transaction] = Array(Transaction(new GregorianCalendar(2008,OCTOBER,1),5),Transaction(new GregorianCalendar(2008,OCTOBER,3),-4))
   }
   class Person{
       def name():java.lang.String = "Joe"
@@ -23,10 +28,13 @@ object EvaluateSpecs extends Specification{
 
   def evaluate(factory:IObjectFormatterFactory){
     import matcher.Matcher
-    def evaluateAs(str:String) = new Matcher[String]{
-      def apply(format: =>String) =
-        (factory.format(format,thePerson) == str,"evaluates as "+str,"does not evaluate as "+str)
+    def evaluateObjectAs(obj:AnyRef,str:String) = new Matcher[String]{
+      def apply(format: =>String) = {
+        val res = factory.format(format,obj)
+        (res == str,"evaluates as "+str,"does not evaluate as "+str+" but as "+ res)
+      }
     }
+    def evaluateAs(str:String) = evaluateObjectAs(thePerson,str)
 
     "literal" in {"literal" must evaluateAs("literal")}
     "property access" in {"#name" must evaluateAs(thePerson.name)}
@@ -35,6 +43,7 @@ object EvaluateSpecs extends Specification{
     "object iterable access with inner expression" in {"#accounts[#number]{,}*" must evaluateAs("78910,12345")}
     "object array access with inner expression" in {"#accs[#number]{,}*" must evaluateAs("78910,12345")}
     "deep property access" in {"#accs[#bank.name]{,}*" must evaluateAs("Sparkasse,Volksbank")}
+    "format dates properly" in {"#this->date[dd.MM.yyyy]" must evaluateObjectAs(new GregorianCalendar(2008,OCTOBER,1),"01.10.2008")}
   }
 
   "The format interpreter" should {
@@ -42,6 +51,19 @@ object EvaluateSpecs extends Specification{
   }
   "The format compiler" should {
     evaluate(FormatCompiler)
+  }
+}
+
+object Test{
+  def main(args:Array[String]){
+    System.out.println("Hello")
+    System.out.println(ObjectFormatter.format(
+"""#name has these bank accounts:
+  #accs[#number at #bank.name having these transactions:
+    #transactions[#centAmount at #date->date[dd.MM.yyyy]]{
+    }*]{
+  }*
+""",EvaluateSpecs.thePerson))
   }
 }
 

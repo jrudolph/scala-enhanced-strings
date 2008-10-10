@@ -45,6 +45,14 @@ class StrLexer extends Lexical with RegexParsers{
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
     def eval(o:AnyRef) = method(o.getClass).invoke(o,null)
   }
+  case class DateConversion(exp:Exp,format:String) extends StrToken{
+    val df = new java.text.SimpleDateFormat(format)
+    def eval(o:AnyRef) = df.format(exp.eval(o) match {
+      case cal:java.util.Calendar => cal.getTime
+      case date:java.util.Date => date
+    })
+    def chars = ""
+  }
   case object ThisExp extends Exp(""){
     override def eval(o:AnyRef) = o
     override def returnType(callingCl:Class[_]):Class[_] = callingCl
@@ -86,8 +94,11 @@ class StrLexer extends Lexical with RegexParsers{
 
   def sepChars = "[^}]*".r
   def spliceExp = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => SpliceExp(exp,separator.getOrElse(""),x.getOrElse(List(ThisExp)))}
+  
+  def dateConversion:Parser[String] = extendParser("->date[") ~!> "[^\\]]*".r <~ "]" 
+  def conversion = exp ~ dateConversion ^^ {case exp ~ format => DateConversion(exp,format)}
 
-  def innerExp:Parser[StrToken] = spliceExp | exp | lit
+  def innerExp:Parser[StrToken] = spliceExp | conversion | exp | lit 
   def inners = '[' ~> rep(innerExp) <~ ']'
 
   import scala.util.parsing.input.CharArrayReader.EofCh
