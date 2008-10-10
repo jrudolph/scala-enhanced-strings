@@ -36,7 +36,7 @@ object Compiler{
       case Literal(str) => f.ldc(str).method2(_.append(_))
       case e:Exp => {
         if (e.returnType(cl).isPrimitive)
-          throw new java.lang.Error("currently no primitives can be put out directly problematic expression: "+e.identifier)
+          throw new java.lang.Error("currently no primitives can be put out directly. Problematic expression: "+e.identifier)
         
         f.l.load.e
          .op(compileGetExp(e,cl,classOf[AnyRef]))
