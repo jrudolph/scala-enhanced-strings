@@ -131,6 +131,21 @@ object Compiler{
         else
           throw new java.lang.Error("can only iterate over iterables and arrays right now")
       }
+      case Conditional(inner,ifs,thens) => {
+        val retType = inner.returnType(cl)
+        
+        var target:ForwardTarget[R**StringBuilder,LR**T] = f.forwardTarget
+        
+        f.l.load.e
+         .op(f => if (retType.isPrimitive)
+               f.op(compileGetExp(inner,cl,classOf[Boolean]))
+             else
+               f.op(compileGetExp(inner,cl,classOf[java.lang.Boolean])).method(_.booleanValue)              
+         )
+         .ifeq(_.op(compileToks(ifs,cl)).jmp(target))
+         .op(compileToks(thens,cl))
+         .targetHere(target)
+      }
     }
   def compileToks[R<:List,LR<:List,T<:java.lang.Object](tok:Seq[StrToken],cl:Class[T])(f:F[R**StringBuilder,LR**T]) = {
     var mf:F[R**StringBuilder,LR**T] = f
