@@ -156,6 +156,24 @@ object Compiler{
          .op(compileTok(thens,cl))
          .targetHere(target)
       }
+      case DateConversion(exp,format) => {
+        val retType = exp.returnType(cl)
+        
+        f.newInstance(classOf[java.text.SimpleDateFormat])
+          .dup
+          .ldc(format)
+          .method2WS(_.applyPattern(_))
+          .l.load.e
+          .op(f=>if (classOf[java.util.Date].isAssignableFrom(retType))
+                   f.op(compileGetExp(exp,cl,classOf[java.util.Date]))
+                 else if (classOf[java.util.Calendar].isAssignableFrom(retType))
+                   f.op(compileGetExp(exp,cl,classOf[java.util.Calendar])).method(_.getTime)
+                 else
+                   throw new java.lang.Error("only date or time can be converted")
+             )
+          .method2(_.format(_))
+          .method2(_.append(_))
+      }
     }
   def compile[T<:AnyRef](format:String,cl:Class[T]):T=>jString = {
     val toks = parser.parse(format)
