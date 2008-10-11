@@ -35,6 +35,7 @@ object ParserSpecs extends Specification {
     "Dots after curly braced expressions 'This is a #{exp}.'" in {"This is a #{exp}." must beParsedAs(Literal("This is a "),Exp("exp"),Literal("."))}
 
     "Curly Braces somewhere in between 'This is {braced}'" in {"This is {braced}" must beParsedAs(Literal("This is {braced}"))}
+    "question mark after expression" in {"Who lives at #address?" must beParsedAs(Literal("Who lives at "),Exp("address"),Literal("?"))}
     
     // conversions
     "date conversion" in {"#this->date[dd.MM.yyyy]" must beParsedAs(DateConversion(ThisExp,"dd.MM.yyyy"))}
