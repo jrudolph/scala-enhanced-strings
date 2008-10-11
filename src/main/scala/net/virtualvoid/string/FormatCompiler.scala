@@ -33,6 +33,12 @@ object Compiler{
 
   def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:StrToken,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = tok match {
+      case StrTokens(toks) => {
+        var mf:F[R**StringBuilder,LR**T] = f
+        for (t<-toks)
+          mf = compileTok(t,cl)(f)
+        mf
+      }
       case Literal(str) => f.ldc(str).method2(_.append(_))
       case e:Exp => {
         if (e.returnType(cl).isPrimitive)
@@ -66,7 +72,7 @@ object Compiler{
                 .method(_.next)
                 .checkcast(eleType)
                 .l.store.e
-                .op(compileToks(inner,eleType))
+                .op(compileTok(inner,eleType))
                 .swap
                 .dup
                 .l.store.e
@@ -109,7 +115,7 @@ object Compiler{
               .swap
               .l.store.e
               .swap
-              .op(compileToks(inner,eleType))
+              .op(compileTok(inner,eleType))
               .swap
               .l.store.e
               .swap
@@ -146,24 +152,18 @@ object Compiler{
              else
                f.op(compileGetExp(inner,cl,classOf[java.lang.Boolean])).method(_.booleanValue)              
          )
-         .ifeq(_.op(compileToks(ifs,cl)).jmp(target))
-         .op(compileToks(thens,cl))
+         .ifeq(_.op(compileTok(ifs,cl)).jmp(target))
+         .op(compileTok(thens,cl))
          .targetHere(target)
       }
     }
-  def compileToks[R<:List,LR<:List,T<:java.lang.Object](tok:Seq[StrToken],cl:Class[T])(f:F[R**StringBuilder,LR**T]) = {
-    var mf:F[R**StringBuilder,LR**T] = f
-    for (t<-tok)
-      mf = compileTok(t,cl)(f)
-    mf
-  }
   def compile[T<:AnyRef](format:String,cl:Class[T]):T=>jString = {
     val toks = parser.parse(format)
     ASMCompiler.compile(cl)(
      f =>
        f.l.store.e
          .newInstance(classOf[StringBuilder])
-         .op(compileToks(toks,cl))
+         .op(compileTok(toks,cl))
          .method(_.toString)
      )
   }

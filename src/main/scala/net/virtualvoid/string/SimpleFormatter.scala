@@ -5,6 +5,6 @@ object ObjectFormatter extends IObjectFormatterFactory{
 
   def formatter[T<:AnyRef](clazz:Class[T],fm:String):IObjectFormatter[T] = new IObjectFormatter[T]{
     val parsed = parser.parse(fm)
-    def format(o:T) = parsed.map(_.eval(o)) mkString ""
+    def format(o:T) = parsed.eval(o)
   }
 }

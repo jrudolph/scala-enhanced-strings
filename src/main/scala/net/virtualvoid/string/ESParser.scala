@@ -22,6 +22,10 @@ class StrLexer extends Lexical with RegexParsers{
   trait StrToken extends Token {
     def eval(o:AnyRef):AnyRef
   }
+  case class StrTokens(toks:Seq[StrToken]) extends StrToken{
+    def chars = ""
+    def eval(o:AnyRef):String = toks.map(_.eval(o)) mkString "" 
+  }
   case class Literal(str:String) extends StrToken{
     def chars = str
     def eval(o:AnyRef):String = str
@@ -45,15 +49,10 @@ class StrLexer extends Lexical with RegexParsers{
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
     def eval(o:AnyRef) = method(o.getClass).invoke(o,null)
   }
-  case class Conditional(condition:Exp,ifToks:List[StrToken],thenToks:List[StrToken]) extends StrToken{
+  case class Conditional(condition:Exp,ifToks:StrTokens,thenToks:StrTokens) extends StrToken{
     def chars =""
-    def eval(o:AnyRef) = { // TODO: we could be much shorter using the Boolean monad or something like that 
-      def evalToks(toks:List[StrToken]) = toks.map(_.eval(o)) mkString ""
-      condition.eval(o) match {
-        case java.lang.Boolean.TRUE => evalToks(ifToks)
-        case java.lang.Boolean.FALSE => evalToks(thenToks)
-      }
-    }
+    def eval(o:AnyRef) =  
+      (if (condition.eval(o)==java.lang.Boolean.TRUE) ifToks else thenToks).eval(o)
   }
   case class DateConversion(exp:Exp,format:String) extends StrToken{
     val df = new java.text.SimpleDateFormat(format)
@@ -72,9 +71,9 @@ class StrLexer extends Lexical with RegexParsers{
   case class ParentExp(inner:Exp,parent:String) extends Exp(parent){
     override def eval(o:AnyRef) = inner.eval(super.eval(o))
   }
-  case class SpliceExp(exp:Exp,sep:String,inner:List[StrToken]) extends StrToken{
+  case class SpliceExp(exp:Exp,sep:String,inner:StrTokens) extends StrToken{
     def chars = exp.chars + ":" + sep
-    def realEval(l:Iterable[AnyRef]):String = l.map(e => inner.map(_.eval(e)) mkString "") mkString sep
+    def realEval(l:Iterable[AnyRef]):String = l.map(inner.eval(_)) mkString sep
     import Java.it2it
     def eval(o:AnyRef) = exp.eval(o) match{
       // array or collection or similar
@@ -103,21 +102,23 @@ class StrLexer extends Lexical with RegexParsers{
     (id | extendParser("{") ~!> id <~! "}")
 
   def sepChars = "[^}]*".r
-  def spliceExp = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => SpliceExp(exp,separator.getOrElse(""),x.getOrElse(List(ThisExp)))}
+  def spliceExp = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => SpliceExp(exp,separator.getOrElse(""),x.getOrElse(StrTokens(List(ThisExp))))}
   
   def dateConversion:Parser[String] = extendParser("->date[") ~!> "[^\\]]*".r <~ "]" 
   def conversion = exp ~ dateConversion ^^ {case exp ~ format => DateConversion(exp,format)}
   
   def clauses = extendParser("?[") ~!> 
-    (rep(innerExp) ~ "|" ~ rep(innerExp) <~ "]")
+    (tokens ~ "|" ~ tokens <~ "]")
   def conditional = exp ~ clauses ^^ {case exp ~ (ifs ~ sep ~ thens) => Conditional(exp,ifs,thens)}
 
   def innerExp:Parser[StrToken] = spliceExp | conversion | conditional | exp | lit 
-  def inners = '[' ~> rep(innerExp) <~ ']'
+  def inners = '[' ~> tokens <~ ']'
+  
+  def tokens:Parser[StrTokens] = rep(innerExp) ^^ {case toks => StrTokens(toks)}
 
   import scala.util.parsing.input.CharArrayReader.EofCh
   override def token:Parser[Token] = (EofCh ^^^ EOF
-     | innerExp )
+     | tokens )
 
   override def whitespace = rep('`')
   override def skipWhitespace = false
@@ -135,12 +136,11 @@ object EnhancedStringFormatParser extends TokenParsers{
   override val lexical = new StrLexer
   import lexical._
 
-  def value:Parser[StrToken] = elem("token",_.isInstanceOf[StrToken]) ^^ {case s:StrToken => s}
-  def values = rep(value)
+  def value:Parser[StrTokens] = elem("tokens",_.isInstanceOf[StrTokens]) ^^ {case s:StrTokens => s}
 
-  def parse(input:String):List[lexical.StrToken] = {
+  def parse(input:String):StrTokens = {
       val scanner:Input = new lexical.Scanner(input).asInstanceOf[Input]
-      val output = phrase(values)(scanner)
+      val output = phrase(value)(scanner)
       output.get
     }
 }
