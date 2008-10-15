@@ -11,7 +11,7 @@ object EvaluateSpecs extends Specification{
   import java.util.Calendar._
   case class Transaction(date:GregorianCalendar,centAmount:Int){
     def isWithdrawal() = centAmount < 0
-    def amount() = Math.abs(centAmount)
+    def amount():java.lang.Integer = Math.abs(centAmount) // no primitives for now
   }
   case class Account(n:String,b:Bank) {
     def number():jString = n
