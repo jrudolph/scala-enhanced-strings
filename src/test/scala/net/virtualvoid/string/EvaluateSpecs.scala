@@ -60,10 +60,10 @@ object EvaluateSpecs extends Specification{
 object Test{
   def main(args:Array[String]){
     System.out.println("Hello")
-    System.out.println(ObjectFormatter.format(
+    System.out.println(FormatCompiler.format(
 """#name has these bank accounts:
   #accs[#number at #bank.name having these transactions:
-    #transactions[#isWithdrawal?[Withdrawal: #amount|Deposit: #amount] Euros at #date->date[dd.MM.yyyy]]{
+    #transactions[#isWithdrawal?[Withdrawal|Deposit]: #amount Euros at #date->date[dd.MM.yyyy]]{ 
     }*]{
   }*
 """,EvaluateSpecs.thePerson))

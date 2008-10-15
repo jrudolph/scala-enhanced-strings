@@ -162,7 +162,7 @@ object Compiler{
         f.newInstance(classOf[java.text.SimpleDateFormat])
           .dup
           .ldc(format)
-          .method2WS(_.applyPattern(_))
+          .method2(_.applyPattern(_)).pop_unit
           .l.load.e
           .op(f=>if (classOf[java.util.Date].isAssignableFrom(retType))
                    f.op(compileGetExp(exp,cl,classOf[java.util.Date]))
