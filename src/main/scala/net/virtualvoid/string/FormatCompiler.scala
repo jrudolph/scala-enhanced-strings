@@ -26,7 +26,7 @@ object Compiler{
        compileGetExp(inner,m.getReturnType.asInstanceOf[Class[Object]],retType)
     }
     case ThisExp =>
-      f.~(checkcast(retType)) // TODO: don't know why we need this, examine it
+      f ~ checkcast(retType) // TODO: don't know why we need this, examine it
     case e:Exp => {
       f ~ dynMethod(e.method(cl),retType)
     }
@@ -144,7 +144,7 @@ object Compiler{
     val toks = parser.parse(format)
     ASMCompiler.compile(cl)(
      f =>
-       f~(_.l.store.e) ~
+       f ~ (_.l.store.e) ~
          newInstance(classOf[StringBuilder]) ~
          compileToks(toks,cl) ~
          method(_.toString)
