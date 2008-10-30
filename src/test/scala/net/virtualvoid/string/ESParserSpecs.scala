@@ -61,4 +61,4 @@ object ParserSpecs extends Specification {
   def parseCorrectly(e: =>Example) = { currentSut.verb += " parse correctly"; e }
 }
 
-class ParserSpecsJUnit4 extends runner.JUnit4(ParserSpecs)
+class ParserSpecsTest extends runner.JUnit4(ParserSpecs)
