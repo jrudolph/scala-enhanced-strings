@@ -188,6 +188,7 @@ object Compiler{
 
 object FormatCompiler extends IObjectFormatterFactory{
   def formatter[T<:AnyRef](clazz:Class[T],fmt:String):IObjectFormatter[T] = new IObjectFormatter[T]{
-    def format(o:T):String = Compiler.compile[T](fmt,clazz)(o)
+    val compiler = Compiler.compile[T](fmt,clazz)
+    def format(o:T):String = compiler(o)
   }
 }
