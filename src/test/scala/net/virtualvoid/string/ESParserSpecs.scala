@@ -3,8 +3,8 @@ package net.virtualvoid.string
 import _root_.org.specs._
 
 object ParserSpecs extends Specification {
-  import EnhancedStringFormatParser.{parse,lexical}
-  import lexical._
+  import EnhancedStringFormatParser.parse
+  import AST._
 
   "The parser" should parseCorrectly {
     "'test'" in {"test" must beParsedAs(Literal("test"))}

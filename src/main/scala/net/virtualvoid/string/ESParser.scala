@@ -16,10 +16,8 @@ object Java{
   }
 }
 
-class StrLexer extends Lexical with RegexParsers{
-  override type Elem = Char
-
-  trait StrToken extends Token {
+object AST{
+  trait StrToken {
     def eval(o:AnyRef):AnyRef
   }
   case class StrTokens(toks:Seq[StrToken]) extends StrToken{
@@ -81,6 +79,13 @@ class StrLexer extends Lexical with RegexParsers{
     case l : Seq[AnyRef] => realEval(l)
     }
   }
+}
+
+object EnhancedStringFormatParser extends RegexParsers{
+  import AST._
+  
+  override type Elem = Char
+  type Tokens = StrToken
 
   implicit def extendParser[T](x:Parser[T]):EParser[T] = EParser[T](x)
 
@@ -115,13 +120,8 @@ class StrLexer extends Lexical with RegexParsers{
   def inners = '[' ~> tokens <~ ']'
   
   def tokens:Parser[StrTokens] = rep(innerExp) ^^ {case toks => StrTokens(toks)}
-
-  import scala.util.parsing.input.CharArrayReader.EofCh
-  override def token:Parser[Token] = (EofCh ^^^ EOF
-     | tokens )
-
-  override def whitespace = rep('`')
-  override def skipWhitespace = false
+  
+  override val skipWhitespace = false
 
   case class EParser[T](oldThis:Parser[T]){
     def ~!> [U](p: => Parser[U]): Parser[U]
@@ -130,17 +130,7 @@ class StrLexer extends Lexical with RegexParsers{
     def <~! [U](p: => Parser[U]): Parser[T]
       = OnceParser{ (for(a <- oldThis; b <- commit(p)) yield a).named("<~!") }
   }
-}
-object EnhancedStringFormatParser extends TokenParsers{
-  type Tokens = StrLexer
-  override val lexical = new StrLexer
-  import lexical._
-
-  def value:Parser[StrTokens] = elem("tokens",_.isInstanceOf[StrTokens]) ^^ {case s:StrTokens => s}
-
-  def parse(input:String):StrTokens = {
-      val scanner:Input = new lexical.Scanner(input).asInstanceOf[Input]
-      val output = phrase(value)(scanner)
-      output.get
-    }
+  
+  def parse(input:String):StrTokens = 
+    phrase(tokens)(new scala.util.parsing.input.CharArrayReader(input.toCharArray)).get
 }

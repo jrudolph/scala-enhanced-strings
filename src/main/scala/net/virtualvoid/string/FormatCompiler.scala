@@ -10,7 +10,7 @@ object Compiler{
   import Bytecode.Implicits._
 
   val parser = EnhancedStringFormatParser
-  import parser.lexical._
+  import AST._
 
   def elementType(it:java.lang.reflect.Type):Class[_ <: AnyRef] = {
     TypeHelper.genericInstanceType(it,classOf[java.lang.Iterable[_]],Array()) match{
