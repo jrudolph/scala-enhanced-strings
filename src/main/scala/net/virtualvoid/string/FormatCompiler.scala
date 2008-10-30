@@ -22,21 +22,21 @@ object Compiler{
   def compileGetExp[R<:List,LR<:List,T,Ret](exp:Exp,cl:Class[T],retType:Class[Ret])(f:F[R**T,LR]):F[R**Ret,LR] = exp match{
     case p@ParentExp(inner,parent) =>{
       val m = p.method(cl)
-      f.dynMethod(m,classOf[AnyRef]) ~ 
+      f ~ dynMethod(m,classOf[AnyRef]) ~ 
        compileGetExp(inner,m.getReturnType.asInstanceOf[Class[Object]],retType)
     }
     case ThisExp =>
       f.~(checkcast(retType)) // TODO: don't know why we need this, examine it
     case e:Exp => {
-      f.dynMethod(e.method(cl),retType)
+      f ~ dynMethod(e.method(cl),retType)
     }
   }
 
   def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:StrToken,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = tok match {
-      case Literal(str) => f.ldc(str).method2(_.append(_))
+      case Literal(str) => f~ldc(str)~method2(_.append(_))
       case e:Exp =>
-        f ~ (_.l.load.e) ~ 
+        f ~ load(l0) ~ 
           compileGetExp(e,cl,classOf[AnyRef]) ~ 
           method(_.toString) ~ 
           method2(_.append(_))
@@ -46,20 +46,20 @@ object Compiler{
         if (classOf[java.lang.Iterable[_]].isAssignableFrom(retType)){
           val eleType:Class[AnyRef] = elementType(exp.genericReturnType(cl)).asInstanceOf[Class[AnyRef]]
           val jmpTarget =
-            f ~ (_.l.load.e) ~
+            f ~ load(l0) ~
              swap ~ // save one instance of T for later
-             (_.l.load.e) ~
+             load(l0) ~
              compileGetExp(exp,cl,classOf[java.lang.Iterable[AnyRef]]) ~
              method(_.iterator) ~
              (_.l.store.e) ~
              target
           jmpTarget ~
-             (_.l.load.e) ~
+             load(l0) ~
              method(_.hasNext) ~
              ifeq(f =>
                f.l.load.e ~
                 swap ~
-                (_.l.load.e) ~
+                load(l0) ~
                 method(_.next) ~
                 checkcast(eleType) ~
                 (_.l.store.e) ~
@@ -83,51 +83,52 @@ object Compiler{
             throw new java.lang.Error("can't handle primitive arrays right now");
 
           val jmpTarget =
-            f.l.load.e
-             .swap
-             .l.load.e
-             .~(compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]))
-             .l.store.e
-             .bipush(0)
-             .target
+            f ~ 
+             load(l0) ~
+             swap ~
+             load(l0) ~
+             compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]) ~
+             (_.l.store.e) ~
+             bipush(0) ~
+             target
 
-          jmpTarget
-           .dup
-           .l.load.e
-           .arraylength
-           .swap
-           .isub
-           .~(ifeq(f =>
-             f.dup_x1
-              .l.load.e
-              .swap
-              .aload
-              .l.load.e
-              .swap
-              .l.store.e
-              .swap
-              .~(compileToks(inner,eleType))
-              .swap
-              .l.store.e
-              .swap
-              .bipush(1) // TODO: better use iinc
-              .~(iadd)
-              .dup
-              .l.load.e
-              .arraylength
-              .isub
-              .~(ifeq(f =>
-                 f.swap
-                  .ldc(sep)
-                  .method2(_.append(_))
-                  .swap
-                  .jmp(jmpTarget)
-              ))
-              .jmp(jmpTarget)
-           ))
-           .pop
-           .swap
-           .l.store.e
+          jmpTarget ~ 
+           dup ~
+           load(l0) ~
+           arraylength ~
+           swap ~
+           isub ~
+           ifeq(f =>
+             f~dup_x1 ~
+              load(l0) ~
+              swap ~
+              aload ~
+              load(l0) ~
+              swap ~
+              (_.l.store.e) ~
+              swap ~
+              compileToks(inner,eleType) ~
+              swap ~
+              (_.l.store.e) ~
+              swap ~
+              bipush(1) ~ // TODO: better use iinc
+              iadd ~
+              dup ~
+              load(l0) ~
+              arraylength ~
+              isub ~
+              ifeq(f =>
+                 f~swap ~
+                  ldc(sep) ~
+                  method2(_.append(_)) ~
+                  swap ~
+                  jmp(jmpTarget)
+              ) ~
+              jmp(jmpTarget)
+           ) ~
+           pop ~
+           swap ~
+           (_.l.store.e)
         }
         else
           throw new java.lang.Error("can only iterate over iterables and arrays right now")
@@ -143,10 +144,10 @@ object Compiler{
     val toks = parser.parse(format)
     ASMCompiler.compile(cl)(
      f =>
-       f.l.store.e
-         .newInstance(classOf[StringBuilder])
-         .~(compileToks(toks,cl))
-         .method(_.toString)
+       f~(_.l.store.e) ~
+         newInstance(classOf[StringBuilder]) ~
+         compileToks(toks,cl) ~
+         method(_.toString)
      )
   }
 }
