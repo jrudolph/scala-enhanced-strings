@@ -31,6 +31,10 @@ object Compiler{
       f ~ dynMethod(e.method(cl),retType)
     }
   }
+  
+  def loop[ST<:List,LT<:List,T](
+    cond:F[ST,LT]=>F[ST**Boolean,LT]
+    ,next:F[ST,LT]=>F[ST**T,LT])(body:F[ST**T,LT]=>F[ST,LT]):F[ST,LT]=>F[ST,LT] = null
 
   def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:StrToken,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = tok match {
@@ -59,6 +63,7 @@ object Compiler{
              method(_.iterator) ~
              (_.l.store.e) ~
              target
+          
           jmpTarget ~
              load(l0) ~
              method(_.hasNext) ~
