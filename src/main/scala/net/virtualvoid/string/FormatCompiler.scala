@@ -93,53 +93,42 @@ object Compiler{
           if (eleType.isPrimitive)
             throw new java.lang.Error("can't handle primitive arrays right now");
 
-          val jmpTarget =
-            f ~ 
+          import Bytecode.RichOperations.foldArray
+          
+          def swapTopWithLocal0[S<:List,L<:List,ST,LT]:F[S**ST,L**LT] => F[S**LT,L**ST] = 
+            _ ~
+            load(l0) ~
+            swap ~
+            (_.l.store.e)
+          
+          f ~
              load(l0) ~
              swap ~
              load(l0) ~
              compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]) ~
-             (_.l.store.e) ~
-             bipush(0) ~
-             target
-
-          jmpTarget ~ 
-           dup ~
-           load(l0) ~
-           arraylength ~
-           swap ~
-           isub ~
-           ifeq(f =>
-             f~dup_x1 ~
-              load(l0) ~
-              swap ~
-              aload ~
-              load(l0) ~
-              swap ~
-              (_.l.store.e) ~
-              swap ~
-              compileTok(inner,eleType) ~
-              swap ~
-              (_.l.store.e) ~
-              swap ~
-              bipush(1) ~ // TODO: better use iinc
-              iadd ~
-              dup ~
-              load(l0) ~
-              arraylength ~
-              isub ~
-              ifeq(f =>
-                 f~swap ~
-                  ldc(sep) ~
-                  method2(_.append(_)) ~
-                  swap ~
-                  jmp(jmpTarget)
-              ) ~
-              jmp(jmpTarget)
-           ) ~
-           pop ~
-           swap ~
-           (_.l.store.e)
+             swap ~
+             foldArray(// index,sb,ele | array
+               _ ~ 
+               swapTopWithLocal0 ~ // index,sb,array | ele
+               swap ~ // index,array,sb
+               compileTok(inner,eleType) ~ //index,array,sb | ele
+               swap ~
+               (_.l.store.e) ~
+               // check if it was latest element or not so we can insert separator
+               swap ~ // sb,index
+               dup_x1 ~ // index,sb,index
+               load(l0) ~ // index,sb,index,array
+               arraylength ~ // index,sb,index,length
+               bipush(1) ~ // index,sb,index,length,1
+               isub ~ // index,sb,index,length-1
+               isub ~ // index,sb,index-(length-1)
+               ifeq2( // index,sb
+                 f=>f, 
+                 ldc(sep) ~ method2(_.append(_)) // append separator if we are not at the end of the array
+               )
+             ) ~
+             swap ~
+             (_.l.store.e)
         }
         else
           throw new java.lang.Error("can only iterate over iterables and arrays right now")
