@@ -147,17 +147,16 @@ object Compiler{
       case Conditional(inner,ifs,thens) => {
         val retType = inner.returnType(cl)
         
-        val target:ForwardTarget[R**StringBuilder,LR**T] = f.forwardTarget
-        
-        f ~ load(l0) ~
-         (f => if (retType.isPrimitive)
-               f ~ compileGetExp(inner,cl,classOf[Boolean])
-             else
-               f ~ compileGetExp(inner,cl,classOf[java.lang.Boolean]) ~ method(_.booleanValue)              
-         ) ~
-         ifeq(_ ~ compileTok(ifs,cl) ~ jmp(target)) ~
-         compileTok(thens,cl) ~
-         targetHere(target)
+        f ~ 
+          load(l0) ~
+          (if (retType.isPrimitive)
+             compileGetExp(inner,cl,classOf[Boolean])
+           else
+             compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ method(_.booleanValue)              
+          ) ~
+          ifeq2(
+           compileTok(thens,cl),
+           compileTok(ifs,cl))
       }
       case DateConversion(exp,format) => {
         val retType = exp.returnType(cl)
