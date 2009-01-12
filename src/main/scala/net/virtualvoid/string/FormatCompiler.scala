@@ -123,7 +123,7 @@ object Compiler{
                isub ~ // index,sb,index,length-1
                isub ~ // index,sb,index-(length-1)
                ifeq2( // index,sb
-                 f=>f, 
+                 f=>f, //FIXME: use id func here
                  ldc(sep) ~ method2(_.append(_)) // append separator if we are not at the end of the array
                )
              ) ~
