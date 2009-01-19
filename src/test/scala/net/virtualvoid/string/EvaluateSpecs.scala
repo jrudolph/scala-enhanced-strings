@@ -57,7 +57,7 @@ object EvaluateSpecs extends Specification{
   }
 }
 
-object Test{
+object FormatAccountsExample{
   def main(args:Array[String]){
     System.out.println("Hello")
     System.out.println(FormatCompiler.format(

@@ -46,7 +46,7 @@ object Compiler{
       }
       case Literal(str) => f~ldc(str)~method2(_.append(_))
       case e:Exp =>
-        f ~ load(l0) ~ 
+        f ~ local[_0,T].load() ~
           compileGetExp(e,cl,classOf[AnyRef]) ~ 
           method(_.toString) ~ 
           method2(_.append(_))
@@ -56,28 +56,30 @@ object Compiler{
         if (classOf[java.lang.Iterable[_]].isAssignableFrom(retType)){
           val eleType:Class[AnyRef] = elementType(exp.genericReturnType(cl)).asInstanceOf[Class[AnyRef]]
           val jmpTarget =
-            f ~ load(l0) ~
+            f ~ 
+             local[_0,T].load() ~
              swap ~ // save one instance of T for later
-             load(l0) ~
+             local[_0,T].load() ~
              compileGetExp(exp,cl,classOf[java.lang.Iterable[AnyRef]]) ~
              method(_.iterator) ~
-             (_.l.store.e) ~
+             local[_0,java.util.Iterator[AnyRef]].store() ~
              target
           
           jmpTarget ~
-             load(l0) ~
+             local[_0,java.util.Iterator[AnyRef]].load() ~
              method(_.hasNext) ~
              ifeq(f =>
-               f.l.load.e ~
+               f ~
+                local[_0,java.util.Iterator[AnyRef]].load() ~
                 swap ~
-                load(l0) ~
+                local[_0,java.util.Iterator[AnyRef]].load() ~
                 method(_.next) ~
                 checkcast(eleType) ~
-                (_.l.store.e) ~
+                local[_0,AnyRef].store() ~
                 compileTok(inner,eleType) ~
                 swap ~
                 dup ~
-                (_.l.store.e) ~
+                local[_0,java.util.Iterator[AnyRef]].store() ~
                 method(_.hasNext) ~
                 ifeq(f =>
                    f~ldc(sep:jString) ~
@@ -85,7 +87,7 @@ object Compiler{
                     jmp(jmpTarget)) ~ //todo: introduce ifeq(thenCode,elseTarget)
                 jmp(jmpTarget)) ~
              swap ~
-             (_.l.store.e)
+             local[_0,T].store[R**StringBuilder,LR**java.util.Iterator[AnyRef]]()
         }
         else if (retType.isArray){
           val eleType:Class[AnyRef] = retType.getComponentType.asInstanceOf[Class[AnyRef]]
@@ -97,14 +99,14 @@ object Compiler{
           
           def swapTopWithLocal0[S<:List,L<:List,ST,LT]:F[S**ST,L**LT] => F[S**LT,L**ST] = 
             _ ~
-            load(l0) ~
+            local[_0,LT].load() ~
             swap ~
-            (_.l.store.e)
+            local[_0,ST].store[S**LT,L**LT]()
           
           f ~
-             load(l0) ~
+             local[_0,T].load() ~
              swap ~
-             load(l0) ~
+             local[_0,T].load() ~
              compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]) ~
              swap ~
              foldArray(// index,sb,ele | array
@@ -113,11 +115,11 @@ object Compiler{
                swap ~ // index,array,sb
                compileTok(inner,eleType) ~ //index,array,sb | ele
                swap ~
-               (_.l.store.e) ~
+               local[_0,Array[AnyRef]].store() ~
                // check if it was latest element or not so we can insert separator
                swap ~ // sb,index
                dup_x1 ~ // index,sb,index
-               load(l0) ~ // index,sb,index,array
+               local[_0,Array[AnyRef]].load() ~ // index,sb,index,array
                arraylength ~ // index,sb,index,length
                bipush(1) ~ // index,sb,index,length,1
                isub ~ // index,sb,index,length-1
@@ -128,7 +130,7 @@ object Compiler{
                )
              ) ~
              swap ~
-             (_.l.store.e)
+             local[_0,T].store[R**StringBuilder,LR**Array[AnyRef]]()
         }
         else
           throw new java.lang.Error("can only iterate over iterables and arrays right now")
@@ -137,7 +139,7 @@ object Compiler{
         val retType = inner.returnType(cl)
         
         f ~ 
-          load(l0) ~
+          local[_0,T].load() ~
           (if (retType.isPrimitive)
              compileGetExp(inner,cl,classOf[Boolean])
            else
@@ -154,7 +156,7 @@ object Compiler{
           dup ~
           ldc(format) ~ 
           method2(_.applyPattern(_)) ~ pop_unit ~
-          load(l0) ~
+          local[_0,T].load() ~
           (f => 
             if (classOf[java.util.Date].isAssignableFrom(retType))
               f ~ compileGetExp(exp,cl,classOf[java.util.Date])
@@ -171,7 +173,7 @@ object Compiler{
     val toks = parser.parse(format)
     ASMCompiler.compile(cl)(
      f =>
-       f ~ (_.l.store.e) ~
+       f ~ local[_0,T].store() ~
          newInstance(classOf[StringBuilder]) ~
          compileTok(toks,cl) ~
          method(_.toString)
