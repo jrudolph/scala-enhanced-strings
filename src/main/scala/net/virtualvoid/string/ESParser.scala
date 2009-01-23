@@ -67,7 +67,8 @@ object AST{
     override def eval(o:AnyRef) = o
     override def returnType(callingCl:Class[_]):Class[_] = callingCl
     override def genericReturnType(callingCl:Class[_]):java.lang.reflect.Type =
-      throw new java.lang.Error("no generic type information available for "+callingCl.getName+" since it is erased")
+      throw new java.lang.Error("No generic type information available for "+callingCl.getName+
+                                  " since it is erased. #this can't be used in conditional or expand expressions")
   }
   case class ParentExp(inner:Exp,parent:String) extends Exp(parent){
     override def eval(o:AnyRef) = inner.eval(super.eval(o))
