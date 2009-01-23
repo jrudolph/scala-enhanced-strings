@@ -40,13 +40,14 @@ object Compiler{
     = tok match {
       case StrTokens(toks) => 
         toks.foldLeft(f){(frame,token) => compileTok(token,cl)(frame)}
-      case Literal(str) => f~ldc(str)~method2(_.append(_))
+      case Literal(str) => 
+        f ~ ldc(str) ~ method2(_.append(_))
       case e:Exp =>
         f ~ local[_0,T].load() ~
           compileGetExp(e,cl,classOf[AnyRef]) ~ 
           method(_.toString) ~ 
           method2(_.append(_))
-      case SpliceExp(exp,sep,inner) => {
+      case Expand(exp,sep,inner) => {
         val retType = exp.returnType(cl)
 
         if (classOf[java.lang.Iterable[_]].isAssignableFrom(retType)){
@@ -142,8 +143,8 @@ object Compiler{
              compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ method(_.booleanValue)              
           ) ~
           ifeq2(
-           compileTok(thens,cl),
-           compileTok(ifs,cl))
+            compileTok(thens,cl),
+            compileTok(ifs,cl))
       }
       case DateConversion(exp,format) => {
         val retType = exp.returnType(cl)

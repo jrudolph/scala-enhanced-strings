@@ -12,14 +12,14 @@ object ParserSpecs extends Specification {
     "'#{prop}'" in {"#{prop}" must beParsedAs(Exp("prop"))}
     "'#{prop.member}'" in {"#{prop.member}" must beParsedAs(ParentExp(Exp("member"),"prop"))}
     "'#prop.member'" in {"#prop.member" must beParsedAs(ParentExp(Exp("member"),"prop"))}
-    "'#listProp*'" in {"#listProp*" must beParsedAs(splice(Exp("listProp"),"",ThisExp))}
-    "'#listProp{,}*'" in {"#listProp{,}*" must beParsedAs(splice(Exp("listProp"),",",ThisExp))}
-    "'#{listProp}{,}*'" in {"#{listProp}{,}*" must beParsedAs(splice(Exp("listProp"),",",ThisExp))}
-    "'#listProp[test]{,}*'" in {"#listProp[test]{,}*" must beParsedAs(splice(Exp("listProp"),",",Literal("test")))}
+    "'#listProp*'" in {"#listProp*" must beParsedAs(expand(Exp("listProp"),"",ThisExp))}
+    "'#listProp{,}*'" in {"#listProp{,}*" must beParsedAs(expand(Exp("listProp"),",",ThisExp))}
+    "'#{listProp}{,}*'" in {"#{listProp}{,}*" must beParsedAs(expand(Exp("listProp"),",",ThisExp))}
+    "'#listProp[test]{,}*'" in {"#listProp[test]{,}*" must beParsedAs(expand(Exp("listProp"),",",Literal("test")))}
 
     "#this" in {"#this" must beParsedAs(ThisExp)}
     "#{this}" in {"#{this}" must beParsedAs(ThisExp)}
-    "#this[]*" in {"#this[]*" must beParsedAs(splice(ThisExp,""))}
+    "#this[]*" in {"#this[]*" must beParsedAs(expand(ThisExp,""))}
 
     //escaped square brackets
     "[[abc]]" in {"[[abc]]" must beParsedAs(Literal("[abc]"))}
@@ -54,7 +54,7 @@ object ParserSpecs extends Specification {
       (l.toString == tokens.toString,"equal",l.toString + " is not equal to the expected " + tokens.toString)
     }
   }
-  def splice(e:Exp,sep:String,inner:StrToken*) = SpliceExp(e,sep,toks(inner:_*))
+  def expand(e:Exp,sep:String,inner:StrToken*) = Expand(e,sep,toks(inner:_*))
   def toks(inner:StrToken*) = StrTokens(List(inner:_*))
 
   import org.specs.specification.Example

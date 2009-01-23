@@ -69,7 +69,7 @@ object AST{
   case class ParentExp(inner:Exp,parent:String) extends Exp(parent){
     override def eval(o:AnyRef) = inner.eval(super.eval(o))
   }
-  case class SpliceExp(exp:Exp,sep:String,inner:StrTokens) extends StrToken{
+  case class Expand(exp:Exp,sep:String,inner:StrTokens) extends StrToken{
     def chars = exp.chars + ":" + sep
     def realEval(l:Iterable[AnyRef]):String = l.map(inner.eval(_)) mkString sep
     import Java.it2it
@@ -107,7 +107,7 @@ object EnhancedStringFormatParser extends RegexParsers{
     (id | extendParser("{") ~!> id <~! "}")
 
   def sepChars = "[^}]*".r
-  def spliceExp = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => SpliceExp(exp,separator.getOrElse(""),x.getOrElse(StrTokens(List(ThisExp))))}
+  def expand = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => Expand(exp,separator.getOrElse(""),x.getOrElse(StrTokens(List(ThisExp))))}
   
   def dateConversion:Parser[String] = extendParser("->date[") ~!> "[^\\]]*".r <~ "]" 
   def conversion = exp ~ dateConversion ^^ {case exp ~ format => DateConversion(exp,format)}
@@ -116,7 +116,7 @@ object EnhancedStringFormatParser extends RegexParsers{
     (tokens ~ "|" ~ tokens <~ "]")
   def conditional = exp ~ clauses ^^ {case exp ~ (ifs ~ sep ~ thens) => Conditional(exp,ifs,thens)}
 
-  def innerExp:Parser[StrToken] = spliceExp | conversion | conditional | exp | lit 
+  def innerExp:Parser[StrToken] = expand | conversion | conditional | exp | lit 
   def inners = '[' ~> tokens <~ ']'
   
   def tokens:Parser[StrTokens] = rep(innerExp) ^^ {case toks => StrTokens(toks)}
