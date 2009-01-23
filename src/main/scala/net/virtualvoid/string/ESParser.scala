@@ -41,7 +41,10 @@ object AST{
      }catch{
      case _:NoSuchMethodException => None
      }
-    def method(cl:Class[_]):Method = Array("get"+capitalize(identifier),identifier).flatMap(findMethod(cl,_).toList).firstOption.getOrElse(throw new java.lang.Error("couldn't find method" + identifier + "in class "+cl.getName))
+    def method(cl:Class[_]):Method = 
+      Array("get"+capitalize(identifier),identifier)
+        .flatMap(findMethod(cl,_).toList).firstOption
+        .getOrElse(throw new java.lang.Error("couldn't find method " + identifier + " in class "+cl.getName))
     def returnType(callingCl:Class[_]):Class[_] = method(callingCl).getReturnType
     def genericReturnType(callingCl:Class[_]):java.lang.reflect.Type = method(callingCl).getGenericReturnType
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
