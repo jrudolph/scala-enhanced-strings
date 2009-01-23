@@ -38,12 +38,8 @@ object Compiler{
 
   def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:StrToken,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = tok match {
-      case StrTokens(toks) => {
-        var mf:F[R**StringBuilder,LR**T] = f
-        for (t<-toks)
-          mf = compileTok(t,cl)(f)
-        mf
-      }
+      case StrTokens(toks) => 
+        toks.foldLeft(f){(frame,token) => compileTok(token,cl)(frame)}
       case Literal(str) => f~ldc(str)~method2(_.append(_))
       case e:Exp =>
         f ~ local[_0,T].load() ~
