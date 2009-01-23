@@ -24,6 +24,8 @@ object EvaluateSpecs extends Specification{
       val sparkasse = Bank("Sparkasse")
       def accounts():java.util.List[Account] = java.util.Arrays.asList(Account("78910",sparkasse),Account("12345",Bank("Volksbank")))
       def accs():Array[Account] = accounts().toArray(new Array[Account](0))
+      def noAddress:Option[String] = None
+      def address:Option[String] = Some("Some Street 5")
   }
   val thePerson = new Person
 
@@ -47,6 +49,8 @@ object EvaluateSpecs extends Specification{
     "format dates properly" in {"#this->date[dd.MM.yyyy]" must evaluateObjectAs(new GregorianCalendar(2008,OCTOBER,1),"01.10.2008")}
     "evaluate conditionals true" in {"#this?[yes|no]" must evaluateObjectAs(java.lang.Boolean.valueOf(true),"yes")}
     "evaluate conditionals false" in {"#this?[yes|no]" must evaluateObjectAs(java.lang.Boolean.valueOf(false),"no")}
+    "evaluate conditionals with Some" in {"#address?[Found: #this|no address given]" must evaluateAs("Found: Some Street 5")}
+    "evaluate conditionals with None" in {"#noAddress?[Found: #this|no address given]" must evaluateAs("no address given")}
   }
 
   "The format interpreter" should {

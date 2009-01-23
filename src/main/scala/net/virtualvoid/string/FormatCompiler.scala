@@ -12,8 +12,8 @@ object Compiler{
   val parser = EnhancedStringFormatParser
   import AST._
 
-  def elementType(it:java.lang.reflect.Type):Class[_ <: AnyRef] = {
-    TypeHelper.genericInstanceType(it,classOf[java.lang.Iterable[_]],Array()) match{
+  def elementType(it:java.lang.reflect.Type,of:Class[_]):Class[_ <: AnyRef] = {
+    TypeHelper.genericInstanceType(it,of,Array()) match{
       case Some(cl:java.lang.Class[AnyRef]) => cl
       case _ => throw new java.lang.Error("Can't get element type of "+it)
     }
@@ -51,7 +51,7 @@ object Compiler{
         val retType = exp.returnType(cl)
 
         if (classOf[java.lang.Iterable[_]].isAssignableFrom(retType)){
-          val eleType:Class[AnyRef] = elementType(exp.genericReturnType(cl)).asInstanceOf[Class[AnyRef]]
+          val eleType:Class[AnyRef] = elementType(exp.genericReturnType(cl),classOf[java.lang.Iterable[_]]).asInstanceOf[Class[AnyRef]]
           val jmpTarget =
             f ~ 
              local[_0,T].load() ~
@@ -132,19 +132,43 @@ object Compiler{
         else
           throw new java.lang.Error("can only iterate over iterables and arrays right now")
       }
-      case Conditional(inner,ifs,thens) => {
+      case Conditional(inner,thens,elses) => {
         val retType = inner.returnType(cl)
-        
-        f ~ 
-          local[_0,T].load() ~
-          (if (retType.isPrimitive)
-             compileGetExp(inner,cl,classOf[Boolean])
-           else
-             compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ method(_.booleanValue)              
-          ) ~
-          ifeq2(
-            compileTok(thens,cl),
-            compileTok(ifs,cl))
+
+        if (retType == java.lang.Boolean.TYPE || classOf[java.lang.Boolean].isAssignableFrom(retType)){
+          f ~ 
+            local[_0,T].load() ~
+            (if (retType == java.lang.Boolean.TYPE)
+               compileGetExp(inner,cl,classOf[Boolean])
+             else 
+               compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ method(_.booleanValue)
+            ) ~
+            ifeq2(
+              compileTok(elses,cl),
+              compileTok(thens,cl))
+        }
+        else if (classOf[Option[AnyRef]].isAssignableFrom(retType)){
+          val eleType = elementType(inner.genericReturnType(cl),classOf[Option[_]]).asInstanceOf[Class[AnyRef]]
+          f ~
+            local[_0,T].load() ~
+            compileGetExp(inner,cl,classOf[Option[AnyRef]]) ~
+            dup ~
+            method(_.isDefined) ~
+            ifeq2(
+              _ ~ pop ~ compileTok(elses,cl),
+              _ ~ 
+                checkcast(classOf[Some[AnyRef]]) ~
+                method(_.get) ~
+                local[_0,T].load() ~
+                swap ~
+                local[_0,AnyRef].store() ~
+                swap ~
+                compileTok(thens,eleType) ~
+                swap ~
+                local[_0,T].store[R**StringBuilder,LR**AnyRef]()(replace_0))
+        }
+        else
+          throw new Error("can't use "+retType+" in a conditional")
       }
       case DateConversion(exp,format) => {
         val retType = exp.returnType(cl)

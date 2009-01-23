@@ -50,10 +50,13 @@ object AST{
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
     def eval(o:AnyRef) = method(o.getClass).invoke(o,null)
   }
-  case class Conditional(condition:Exp,ifToks:StrTokens,thenToks:StrTokens) extends StrToken{
+  case class Conditional(condition:Exp,thenToks:StrTokens,elseToks:StrTokens) extends StrToken{
     def chars =""
-    def eval(o:AnyRef) =  
-      (if (condition.eval(o)==java.lang.Boolean.TRUE) ifToks else thenToks).eval(o)
+    def eval(o:AnyRef) = condition.eval(o) match {
+      case java.lang.Boolean.TRUE => thenToks.eval(o)
+      case java.lang.Boolean.FALSE => elseToks.eval(o)
+      case x:Option[AnyRef] => x.map(thenToks.eval).getOrElse(elseToks.eval(o))
+    }
   }
   case class DateConversion(exp:Exp,format:String) extends StrToken{
     val df = new java.text.SimpleDateFormat(format)
