@@ -192,13 +192,13 @@ object Compiler{
       }
     }
   def compile[T<:AnyRef](format:String,cl:Class[T]):T=>jString = {
-    val toks = parser.parse(format)
+    val elements:FormatElements = parser.parse(format)
     ASMCompiler.compile(cl)(
-     f =>
-       f ~ local[_0,T].store() ~
-         newInstance(classOf[StringBuilder]) ~
-         compileFormatElements(toks,cl) ~
-         method(_.toString)
+      _ 
+      ~ local[_0,T].store()
+      ~ newInstance(classOf[StringBuilder])
+      ~ compileFormatElements(elements,cl)
+      ~ method(_.toString)
      )
   }
 }
