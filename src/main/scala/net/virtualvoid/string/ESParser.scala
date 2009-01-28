@@ -19,15 +19,28 @@ object Java{
 object AST{
   trait FormatElement {
     def eval(o:AnyRef):AnyRef
-  }
-  case class FormatElements(toks:Seq[FormatElement]){
-    def chars = ""
-    def eval(o:AnyRef):String = toks.map(_.eval(o)) mkString "" 
-  }
+  }  
   case class Literal(str:String) extends FormatElement{
     def chars = str
     def eval(o:AnyRef):String = str
   }
+  case class Conditional(condition:Exp,thenToks:FormatElements,elseToks:FormatElements) extends FormatElement{
+    def chars =""
+    def eval(o:AnyRef) = condition.eval(o) match {
+      case java.lang.Boolean.TRUE => thenToks.eval(o)
+      case java.lang.Boolean.FALSE => elseToks.eval(o)
+      case x:Option[AnyRef] => x.map(thenToks.eval).getOrElse(elseToks.eval(o))
+    }
+  }
+  case class DateConversion(exp:Exp,format:String) extends FormatElement{
+    val df = new java.text.SimpleDateFormat(format)
+    def eval(o:AnyRef) = df.format(exp.eval(o) match {
+      case cal:java.util.Calendar => cal.getTime
+      case date:java.util.Date => date
+    })
+    def chars = ""
+  }
+  
   case class Exp(identifier:String) extends FormatElement{
     def chars = identifier
 
@@ -50,22 +63,6 @@ object AST{
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
     def eval(o:AnyRef) = method(o.getClass).invoke(o,null)
   }
-  case class Conditional(condition:Exp,thenToks:FormatElements,elseToks:FormatElements) extends FormatElement{
-    def chars =""
-    def eval(o:AnyRef) = condition.eval(o) match {
-      case java.lang.Boolean.TRUE => thenToks.eval(o)
-      case java.lang.Boolean.FALSE => elseToks.eval(o)
-      case x:Option[AnyRef] => x.map(thenToks.eval).getOrElse(elseToks.eval(o))
-    }
-  }
-  case class DateConversion(exp:Exp,format:String) extends FormatElement{
-    val df = new java.text.SimpleDateFormat(format)
-    def eval(o:AnyRef) = df.format(exp.eval(o) match {
-      case cal:java.util.Calendar => cal.getTime
-      case date:java.util.Date => date
-    })
-    def chars = ""
-  }
   case object ThisExp extends Exp(""){
     override def eval(o:AnyRef) = o
     override def returnType(callingCl:Class[_]):Class[_] = callingCl
@@ -85,6 +82,11 @@ object AST{
     case l : java.lang.Iterable[AnyRef] => realEval(l)
     case l : Seq[AnyRef] => realEval(l)
     }
+  }
+  
+  case class FormatElements(toks:Seq[FormatElement]){
+    def chars = ""
+    def eval(o:AnyRef):String = toks.map(_.eval(o)) mkString "" 
   }
 }
 
