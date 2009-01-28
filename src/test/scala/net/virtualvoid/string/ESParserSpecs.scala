@@ -47,15 +47,15 @@ object ParserSpecs extends Specification {
   // helper methods
 
   import org.specs.matcher.Matcher
-  def beParsedAs(ts:StrToken*) = new Matcher[String]{
+  def beParsedAs(ts:FormatElement*) = new Matcher[String]{
     val tokens = toks(ts:_*)
     def apply(str: => String) = {
       val l = parse(str)
       (l.toString == tokens.toString,"equal",l.toString + " is not equal to the expected " + tokens.toString)
     }
   }
-  def expand(e:Exp,sep:String,inner:StrToken*) = Expand(e,sep,toks(inner:_*))
-  def toks(inner:StrToken*) = StrTokens(List(inner:_*))
+  def expand(e:Exp,sep:String,inner:FormatElement*) = Expand(e,sep,toks(inner:_*))
+  def toks(inner:FormatElement*) = FormatElements(List(inner:_*))
 
   import org.specs.specification.Example
   def parseCorrectly(e: =>Example) = { currentSut.verb += " parse correctly"; e }

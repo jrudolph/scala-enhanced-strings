@@ -36,9 +36,9 @@ object Compiler{
     cond:F[ST,LT]=>F[ST**Boolean,LT]
     ,next:F[ST,LT]=>F[ST**T,LT])(body:F[ST**T,LT]=>F[ST,LT]):F[ST,LT]=>F[ST,LT] = null
 
-  def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:StrToken,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
+  def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = tok match {
-      case StrTokens(toks) => 
+      case FormatElements(toks) => 
         toks.foldLeft(f){(frame,token) => compileTok(token,cl)(frame)}
       case Literal(str) => 
         f ~ ldc(str) ~ method2(_.append(_))

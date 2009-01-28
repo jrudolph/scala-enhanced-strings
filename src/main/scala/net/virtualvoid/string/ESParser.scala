@@ -17,18 +17,18 @@ object Java{
 }
 
 object AST{
-  trait StrToken {
+  trait FormatElement {
     def eval(o:AnyRef):AnyRef
   }
-  case class StrTokens(toks:Seq[StrToken]) extends StrToken{
+  case class FormatElements(toks:Seq[FormatElement]) extends FormatElement{
     def chars = ""
     def eval(o:AnyRef):String = toks.map(_.eval(o)) mkString "" 
   }
-  case class Literal(str:String) extends StrToken{
+  case class Literal(str:String) extends FormatElement{
     def chars = str
     def eval(o:AnyRef):String = str
   }
-  case class Exp(identifier:String) extends StrToken{
+  case class Exp(identifier:String) extends FormatElement{
     def chars = identifier
 
     import java.lang.reflect.{Method}
@@ -50,7 +50,7 @@ object AST{
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
     def eval(o:AnyRef) = method(o.getClass).invoke(o,null)
   }
-  case class Conditional(condition:Exp,thenToks:StrTokens,elseToks:StrTokens) extends StrToken{
+  case class Conditional(condition:Exp,thenToks:FormatElements,elseToks:FormatElements) extends FormatElement{
     def chars =""
     def eval(o:AnyRef) = condition.eval(o) match {
       case java.lang.Boolean.TRUE => thenToks.eval(o)
@@ -58,7 +58,7 @@ object AST{
       case x:Option[AnyRef] => x.map(thenToks.eval).getOrElse(elseToks.eval(o))
     }
   }
-  case class DateConversion(exp:Exp,format:String) extends StrToken{
+  case class DateConversion(exp:Exp,format:String) extends FormatElement{
     val df = new java.text.SimpleDateFormat(format)
     def eval(o:AnyRef) = df.format(exp.eval(o) match {
       case cal:java.util.Calendar => cal.getTime
@@ -76,7 +76,7 @@ object AST{
   case class ParentExp(inner:Exp,parent:String) extends Exp(parent){
     override def eval(o:AnyRef) = inner.eval(super.eval(o))
   }
-  case class Expand(exp:Exp,sep:String,inner:StrTokens) extends StrToken{
+  case class Expand(exp:Exp,sep:String,inner:FormatElements) extends FormatElement{
     def chars = exp.chars + ":" + sep
     def realEval(l:Iterable[AnyRef]):String = l.map(inner.eval(_)) mkString sep
     import Java.it2it
@@ -92,7 +92,7 @@ object EnhancedStringFormatParser extends RegexParsers{
   import AST._
   
   override type Elem = Char
-  type Tokens = StrToken
+  type Tokens = FormatElement
 
   implicit def extendParser[T](x:Parser[T]):EParser[T] = EParser[T](x)
 
@@ -102,7 +102,7 @@ object EnhancedStringFormatParser extends RegexParsers{
 
   def char = "[^#\\]|\\[]".r | escapedByDoubling("[") | escapedByDoubling("]") | escapedByDoubling("#") | escapedByDoubling("|")
   def idChar = "\\w".r
-  def lit:Parser[StrToken] = char ~ rep(char) ^^ {case first ~ rest => Literal(first :: rest reduceLeft (_+_))}
+  def lit:Parser[FormatElement] = char ~ rep(char) ^^ {case first ~ rest => Literal(first :: rest reduceLeft (_+_))}
 
   def idPart:Parser[String] = idChar ~ rep(idChar) ^^ {case first ~ rest => first :: rest mkString ""}
   def id:Parser[Exp] =
@@ -114,7 +114,7 @@ object EnhancedStringFormatParser extends RegexParsers{
     (id | extendParser("{") ~!> id <~! "}")
 
   def sepChars = "[^}]*".r
-  def expand = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => Expand(exp,separator.getOrElse(""),x.getOrElse(StrTokens(List(ThisExp))))}
+  def expand = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => Expand(exp,separator.getOrElse(""),x.getOrElse(FormatElements(List(ThisExp))))}
   
   def dateConversion:Parser[String] = extendParser("->date[") ~!> "[^\\]]*".r <~ "]" 
   def conversion = exp ~ dateConversion ^^ {case exp ~ format => DateConversion(exp,format)}
@@ -123,10 +123,10 @@ object EnhancedStringFormatParser extends RegexParsers{
     (tokens ~ "|" ~ tokens <~ "]")
   def conditional = exp ~ clauses ^^ {case exp ~ (ifs ~ sep ~ thens) => Conditional(exp,ifs,thens)}
 
-  def innerExp:Parser[StrToken] = expand | conversion | conditional | exp | lit 
+  def innerExp:Parser[FormatElement] = expand | conversion | conditional | exp | lit 
   def inners = '[' ~> tokens <~ ']'
   
-  def tokens:Parser[StrTokens] = rep(innerExp) ^^ {case toks => StrTokens(toks)}
+  def tokens:Parser[FormatElements] = rep(innerExp) ^^ {case toks => FormatElements(toks)}
   
   override val skipWhitespace = false
 
@@ -138,7 +138,7 @@ object EnhancedStringFormatParser extends RegexParsers{
       = OnceParser{ (for(a <- oldThis; b <- commit(p)) yield a).named("<~!") }
   }
   
-  def parse(input:String):StrTokens = 
+  def parse(input:String):FormatElements = 
     phrase(tokens)(new scala.util.parsing.input.CharArrayReader(input.toCharArray)) match {
       case Success(res,_) => res
       case x:NoSuccess => error(x.msg)
