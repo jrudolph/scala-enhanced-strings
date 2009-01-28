@@ -36,7 +36,7 @@ object Compiler{
     cond:F[ST,LT]=>F[ST**Boolean,LT]
     ,next:F[ST,LT]=>F[ST**T,LT])(body:F[ST**T,LT]=>F[ST,LT]):F[ST,LT]=>F[ST,LT] = null
   
-  def compileFormatElements[R<:List,LR<:List,T<:java.lang.Object](elements:FormatElements,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
+  def compileFormatElementList[R<:List,LR<:List,T<:java.lang.Object](elements:FormatElementList,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
     elements.elements.foldLeft(f){(frame,element) => compileElement(element,cl)(frame)}
 
   def compileElement[R<:List,LR<:List,T<:java.lang.Object](ele:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
@@ -74,7 +74,7 @@ object Compiler{
                 method(_.next) ~
                 checkcast(eleType) ~
                 local[_0,AnyRef].store() ~
-                compileFormatElements(inner,eleType) ~
+                compileFormatElementList(inner,eleType) ~
                 swap ~
                 dup ~
                 local[_0,java.util.Iterator[AnyRef]].store() ~
@@ -111,7 +111,7 @@ object Compiler{
                _ ~ 
                swapTopWithLocal0 ~ // index,sb,array | ele
                swap ~ // index,array,sb
-               compileFormatElements(inner,eleType) ~ //index,array,sb | ele
+               compileFormatElementList(inner,eleType) ~ //index,array,sb | ele
                swap ~
                local[_0,Array[AnyRef]].store() ~
                // check if it was latest element or not so we can insert separator
@@ -145,8 +145,8 @@ object Compiler{
                compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ method(_.booleanValue)
             ) ~
             ifeq2(
-              compileFormatElements(elses,cl),
-              compileFormatElements(thens,cl))
+              compileFormatElementList(elses,cl),
+              compileFormatElementList(thens,cl))
         }
         else if (classOf[Option[AnyRef]].isAssignableFrom(retType)){
           val eleType = elementType(inner.genericReturnType(cl),classOf[Option[_]]).asInstanceOf[Class[AnyRef]]
@@ -156,7 +156,7 @@ object Compiler{
             dup ~
             method(_.isDefined) ~
             ifeq2(
-              _ ~ pop ~ compileFormatElements(elses,cl),
+              _ ~ pop ~ compileFormatElementList(elses,cl),
               _ ~ 
                 checkcast(classOf[Some[AnyRef]]) ~
                 method(_.get) ~
@@ -164,7 +164,7 @@ object Compiler{
                 swap ~
                 local[_0,AnyRef].store() ~
                 swap ~
-                compileFormatElements(thens,eleType) ~
+                compileFormatElementList(thens,eleType) ~
                 swap ~
                 local[_0,T].store[R**StringBuilder,LR**AnyRef]()(replace_0))
         }
@@ -192,12 +192,12 @@ object Compiler{
       }
     }
   def compile[T<:AnyRef](format:String,cl:Class[T]):T=>jString = {
-    val elements:FormatElements = parser.parse(format)
+    val elements:FormatElementList = parser.parse(format)
     ASMCompiler.compile(cl)(
       _ 
       ~ local[_0,T].store()
       ~ newInstance(classOf[StringBuilder])
-      ~ compileFormatElements(elements,cl)
+      ~ compileFormatElementList(elements,cl)
       ~ method(_.toString)
      )
   }

@@ -57,7 +57,7 @@ object ParserSpecs extends Specification {
   def beParsedAs(ts:Exp):Matcher[String] = beParsedAs(ToStringConversion(ts))
   
   def expand(e:Exp,sep:String,inner:FormatElement*) = Expand(e,sep,toks(inner:_*))
-  def toks(inner:FormatElement*) = FormatElements(List(inner:_*))
+  def toks(inner:FormatElement*) = FormatElementList(List(inner:_*))
 
   import org.specs.specification.Example
   def parseCorrectly(e: =>Example) = { currentSut.verb += " parse correctly"; e }

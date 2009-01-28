@@ -27,7 +27,7 @@ object AST{
   case class ToStringConversion(exp:Exp) extends FormatElement{
     def format(o:AnyRef):String = exp.eval(o).toString
   }
-  case class Conditional(condition:Exp,thenToks:FormatElements,elseToks:FormatElements) extends FormatElement{
+  case class Conditional(condition:Exp,thenToks:FormatElementList,elseToks:FormatElementList) extends FormatElement{
     def chars =""
     def format(o:AnyRef) = condition.eval(o) match {
       case java.lang.Boolean.TRUE => thenToks.format(o)
@@ -43,7 +43,7 @@ object AST{
     })
     def chars = ""
   }
-  case class Expand(exp:Exp,sep:String,inner:FormatElements) extends FormatElement{
+  case class Expand(exp:Exp,sep:String,inner:FormatElementList) extends FormatElement{
     def chars = exp.chars + ":" + sep
     def realEval(l:Iterable[AnyRef]):String = l.map(inner.format(_)) mkString sep
     import Java.it2it
@@ -87,7 +87,7 @@ object AST{
     override def eval(o:AnyRef) = inner.eval(super.eval(o))
   }
   
-  case class FormatElements(elements:Seq[FormatElement]){
+  case class FormatElementList(elements:Seq[FormatElement]){
     def chars = ""
     def format(o:AnyRef):String = elements.map(_.format(o)) mkString "" 
   }
@@ -121,7 +121,7 @@ object EnhancedStringFormatParser extends RegexParsers{
   def expAsString:Parser[FormatElement] = exp ^^ {case exp => ToStringConversion(exp)}
 
   def sepChars = "[^}]*".r
-  def expand = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => Expand(exp,separator.getOrElse(""),x.getOrElse(FormatElements(List(ToStringConversion(ThisExp)))))}
+  def expand = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => Expand(exp,separator.getOrElse(""),x.getOrElse(FormatElementList(List(ToStringConversion(ThisExp)))))}
   
   def dateConversion:Parser[String] = extendParser("->date[") ~!> "[^\\]]*".r <~ "]" 
   def conversion = exp ~ dateConversion ^^ {case exp ~ format => DateConversion(exp,format)}
@@ -137,7 +137,7 @@ object EnhancedStringFormatParser extends RegexParsers{
                                      |  lit)
   def inners = '[' ~> tokens <~ ']'
   
-  def tokens:Parser[FormatElements] = rep(innerExp) ^^ {case toks => FormatElements(toks)}
+  def tokens:Parser[FormatElementList] = rep(innerExp) ^^ {case toks => FormatElementList(toks)}
   
   override val skipWhitespace = false
 
@@ -149,7 +149,7 @@ object EnhancedStringFormatParser extends RegexParsers{
       = OnceParser{ (for(a <- oldThis; b <- commit(p)) yield a).named("<~!") }
   }
   
-  def parse(input:String):FormatElements = 
+  def parse(input:String):FormatElementList = 
     phrase(tokens)(new scala.util.parsing.input.CharArrayReader(input.toCharArray)) match {
       case Success(res,_) => res
       case x:NoSuccess => error(x.msg)
