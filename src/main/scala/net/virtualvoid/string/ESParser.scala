@@ -20,7 +20,7 @@ object AST{
   trait FormatElement {
     def eval(o:AnyRef):AnyRef
   }
-  case class FormatElements(toks:Seq[FormatElement]) extends FormatElement{
+  case class FormatElements(toks:Seq[FormatElement]){
     def chars = ""
     def eval(o:AnyRef):String = toks.map(_.eval(o)) mkString "" 
   }

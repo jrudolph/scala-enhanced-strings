@@ -35,11 +35,12 @@ object Compiler{
   def loop[ST<:List,LT<:List,T](
     cond:F[ST,LT]=>F[ST**Boolean,LT]
     ,next:F[ST,LT]=>F[ST**T,LT])(body:F[ST**T,LT]=>F[ST,LT]):F[ST,LT]=>F[ST,LT] = null
+  
+  def compileFormatElements[R<:List,LR<:List,T<:java.lang.Object](elements:FormatElements,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
+    elements.toks.foldLeft(f){(frame,token) => compileTok(token,cl)(frame)}
 
   def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = tok match {
-      case FormatElements(toks) => 
-        toks.foldLeft(f){(frame,token) => compileTok(token,cl)(frame)}
       case Literal(str) => 
         f ~ ldc(str) ~ method2(_.append(_))
       case e:Exp =>
@@ -73,7 +74,7 @@ object Compiler{
                 method(_.next) ~
                 checkcast(eleType) ~
                 local[_0,AnyRef].store() ~
-                compileTok(inner,eleType) ~
+                compileFormatElements(inner,eleType) ~
                 swap ~
                 dup ~
                 local[_0,java.util.Iterator[AnyRef]].store() ~
@@ -110,7 +111,7 @@ object Compiler{
                _ ~ 
                swapTopWithLocal0 ~ // index,sb,array | ele
                swap ~ // index,array,sb
-               compileTok(inner,eleType) ~ //index,array,sb | ele
+               compileFormatElements(inner,eleType) ~ //index,array,sb | ele
                swap ~
                local[_0,Array[AnyRef]].store() ~
                // check if it was latest element or not so we can insert separator
@@ -144,8 +145,8 @@ object Compiler{
                compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ method(_.booleanValue)
             ) ~
             ifeq2(
-              compileTok(elses,cl),
-              compileTok(thens,cl))
+              compileFormatElements(elses,cl),
+              compileFormatElements(thens,cl))
         }
         else if (classOf[Option[AnyRef]].isAssignableFrom(retType)){
           val eleType = elementType(inner.genericReturnType(cl),classOf[Option[_]]).asInstanceOf[Class[AnyRef]]
@@ -155,7 +156,7 @@ object Compiler{
             dup ~
             method(_.isDefined) ~
             ifeq2(
-              _ ~ pop ~ compileTok(elses,cl),
+              _ ~ pop ~ compileFormatElements(elses,cl),
               _ ~ 
                 checkcast(classOf[Some[AnyRef]]) ~
                 method(_.get) ~
@@ -163,7 +164,7 @@ object Compiler{
                 swap ~
                 local[_0,AnyRef].store() ~
                 swap ~
-                compileTok(thens,eleType) ~
+                compileFormatElements(thens,eleType) ~
                 swap ~
                 local[_0,T].store[R**StringBuilder,LR**AnyRef]()(replace_0))
         }
@@ -196,7 +197,7 @@ object Compiler{
      f =>
        f ~ local[_0,T].store() ~
          newInstance(classOf[StringBuilder]) ~
-         compileTok(toks,cl) ~
+         compileFormatElements(toks,cl) ~
          method(_.toString)
      )
   }
