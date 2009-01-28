@@ -37,10 +37,10 @@ object Compiler{
     ,next:F[ST,LT]=>F[ST**T,LT])(body:F[ST**T,LT]=>F[ST,LT]):F[ST,LT]=>F[ST,LT] = null
   
   def compileFormatElements[R<:List,LR<:List,T<:java.lang.Object](elements:FormatElements,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
-    elements.elements.foldLeft(f){(frame,element) => compileTok(element,cl)(frame)}
+    elements.elements.foldLeft(f){(frame,element) => compileElement(element,cl)(frame)}
 
-  def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
-    = tok match {
+  def compileElement[R<:List,LR<:List,T<:java.lang.Object](ele:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
+    = ele match {
       case Literal(str) => 
         f ~ ldc(str) ~ method2(_.append(_))
       case ToStringConversion(e) =>
