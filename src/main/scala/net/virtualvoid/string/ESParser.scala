@@ -87,9 +87,9 @@ object AST{
     override def eval(o:AnyRef) = inner.eval(super.eval(o))
   }
   
-  case class FormatElements(toks:Seq[FormatElement]){
+  case class FormatElements(elements:Seq[FormatElement]){
     def chars = ""
-    def format(o:AnyRef):String = toks.map(_.format(o)) mkString "" 
+    def format(o:AnyRef):String = elements.map(_.format(o)) mkString "" 
   }
 }
 

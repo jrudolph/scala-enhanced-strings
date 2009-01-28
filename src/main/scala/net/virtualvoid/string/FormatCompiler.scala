@@ -37,7 +37,7 @@ object Compiler{
     ,next:F[ST,LT]=>F[ST**T,LT])(body:F[ST**T,LT]=>F[ST,LT]):F[ST,LT]=>F[ST,LT] = null
   
   def compileFormatElements[R<:List,LR<:List,T<:java.lang.Object](elements:FormatElements,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
-    elements.toks.foldLeft(f){(frame,token) => compileTok(token,cl)(frame)}
+    elements.elements.foldLeft(f){(frame,element) => compileTok(element,cl)(frame)}
 
   def compileTok[R<:List,LR<:List,T<:java.lang.Object](tok:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = tok match {
