@@ -43,7 +43,7 @@ object Compiler{
     = tok match {
       case Literal(str) => 
         f ~ ldc(str) ~ method2(_.append(_))
-      case e:Exp =>
+      case ToStringConversion(e) =>
         f ~ local[_0,T].load() ~
           compileGetExp(e,cl,classOf[AnyRef]) ~ 
           method(_.toString) ~ 

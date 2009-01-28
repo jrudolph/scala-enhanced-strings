@@ -18,7 +18,7 @@ object Java{
 
 object AST{
   trait FormatElement {
-    def eval(o:AnyRef):AnyRef
+    def eval(o:AnyRef):String
   }  
   case class Literal(str:String) extends FormatElement{
     def chars = str
@@ -40,8 +40,11 @@ object AST{
     })
     def chars = ""
   }
+  case class ToStringConversion(exp:Exp) extends FormatElement{
+    def eval(o:AnyRef):String = exp.eval(o).toString
+  }
   
-  case class Exp(identifier:String) extends FormatElement{
+  case class Exp(identifier:String){
     def chars = identifier
 
     import java.lang.reflect.{Method}
@@ -114,9 +117,11 @@ object EnhancedStringFormatParser extends RegexParsers{
 
   def exp:Parser[Exp] = expStartChar ~>
     (id | extendParser("{") ~!> id <~! "}")
+  
+  def expAsString:Parser[FormatElement] = exp ^^ {case exp => ToStringConversion(exp)}
 
   def sepChars = "[^}]*".r
-  def expand = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => Expand(exp,separator.getOrElse(""),x.getOrElse(FormatElements(List(ThisExp))))}
+  def expand = exp ~ opt(inners) ~ opt(extendParser('{') ~!> sepChars <~! '}') <~ "*" ^^ {case exp ~ x ~ separator => Expand(exp,separator.getOrElse(""),x.getOrElse(FormatElements(List(ToStringConversion(ThisExp)))))}
   
   def dateConversion:Parser[String] = extendParser("->date[") ~!> "[^\\]]*".r <~ "]" 
   def conversion = exp ~ dateConversion ^^ {case exp ~ format => DateConversion(exp,format)}
@@ -125,7 +130,11 @@ object EnhancedStringFormatParser extends RegexParsers{
     (tokens ~ "|" ~ tokens <~ "]")
   def conditional = exp ~ clauses ^^ {case exp ~ (ifs ~ sep ~ thens) => Conditional(exp,ifs,thens)}
 
-  def innerExp:Parser[FormatElement] = expand | conversion | conditional | exp | lit 
+  def innerExp:Parser[FormatElement] = (expand
+                                     |  conversion 
+                                     |  conditional
+                                     |  expAsString
+                                     |  lit)
   def inners = '[' ~> tokens <~ ']'
   
   def tokens:Parser[FormatElements] = rep(innerExp) ^^ {case toks => FormatElements(toks)}

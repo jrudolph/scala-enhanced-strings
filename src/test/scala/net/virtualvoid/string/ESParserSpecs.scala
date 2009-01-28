@@ -12,9 +12,9 @@ object ParserSpecs extends Specification {
     "'#{prop}'" in {"#{prop}" must beParsedAs(Exp("prop"))}
     "'#{prop.member}'" in {"#{prop.member}" must beParsedAs(ParentExp(Exp("member"),"prop"))}
     "'#prop.member'" in {"#prop.member" must beParsedAs(ParentExp(Exp("member"),"prop"))}
-    "'#listProp*'" in {"#listProp*" must beParsedAs(expand(Exp("listProp"),"",ThisExp))}
-    "'#listProp{,}*'" in {"#listProp{,}*" must beParsedAs(expand(Exp("listProp"),",",ThisExp))}
-    "'#{listProp}{,}*'" in {"#{listProp}{,}*" must beParsedAs(expand(Exp("listProp"),",",ThisExp))}
+    "'#listProp*'" in {"#listProp*" must beParsedAs(expand(Exp("listProp"),"",ToStringConversion(ThisExp)))}
+    "'#listProp{,}*'" in {"#listProp{,}*" must beParsedAs(expand(Exp("listProp"),",",ToStringConversion(ThisExp)))}
+    "'#{listProp}{,}*'" in {"#{listProp}{,}*" must beParsedAs(expand(Exp("listProp"),",",ToStringConversion(ThisExp)))}
     "'#listProp[test]{,}*'" in {"#listProp[test]{,}*" must beParsedAs(expand(Exp("listProp"),",",Literal("test")))}
 
     "#this" in {"#this" must beParsedAs(ThisExp)}
@@ -32,16 +32,16 @@ object ParserSpecs extends Specification {
 
     // test weird control combinations
     "Dots in normal literals 'This is a sentence.'" in {"This is a sentence." must beParsedAs(Literal("This is a sentence."))}
-    "Dots after curly braced expressions 'This is a #{exp}.'" in {"This is a #{exp}." must beParsedAs(Literal("This is a "),Exp("exp"),Literal("."))}
+    "Dots after curly braced expressions 'This is a #{exp}.'" in {"This is a #{exp}." must beParsedAs(Literal("This is a "),ToStringConversion(Exp("exp")),Literal("."))}
 
     "Curly Braces somewhere in between 'This is {braced}'" in {"This is {braced}" must beParsedAs(Literal("This is {braced}"))}
-    "question mark after expression" in {"Who lives at #address?" must beParsedAs(Literal("Who lives at "),Exp("address"),Literal("?"))}
+    "question mark after expression" in {"Who lives at #address?" must beParsedAs(Literal("Who lives at "),ToStringConversion(Exp("address")),Literal("?"))}
     
     // conversions
     "date conversion" in {"#this->date[dd.MM.yyyy]" must beParsedAs(DateConversion(ThisExp,"dd.MM.yyyy"))}
     
     // conditionals
-    "conditionals" in {"#this?[#this|Nope]" must beParsedAs(Conditional(ThisExp,toks(ThisExp),toks(Literal("Nope"))))}
+    "conditionals" in {"#this?[#this|Nope]" must beParsedAs(Conditional(ThisExp,toks(ToStringConversion(ThisExp)),toks(Literal("Nope"))))}
   }
 
   // helper methods
@@ -54,6 +54,8 @@ object ParserSpecs extends Specification {
       (l.toString == tokens.toString,"equal",l.toString + " is not equal to the expected " + tokens.toString)
     }
   }
+  def beParsedAs(ts:Exp):Matcher[String] = beParsedAs(ToStringConversion(ts))
+  
   def expand(e:Exp,sep:String,inner:FormatElement*) = Expand(e,sep,toks(inner:_*))
   def toks(inner:FormatElement*) = FormatElements(List(inner:_*))
 
