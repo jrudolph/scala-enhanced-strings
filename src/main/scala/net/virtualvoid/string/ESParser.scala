@@ -18,30 +18,30 @@ object Java{
 
 object AST{
   trait FormatElement {
-    def eval(o:AnyRef):String
+    def format(o:AnyRef):String
   }  
   case class Literal(str:String) extends FormatElement{
     def chars = str
-    def eval(o:AnyRef):String = str
+    def format(o:AnyRef):String = str
   }
   case class Conditional(condition:Exp,thenToks:FormatElements,elseToks:FormatElements) extends FormatElement{
     def chars =""
-    def eval(o:AnyRef) = condition.eval(o) match {
-      case java.lang.Boolean.TRUE => thenToks.eval(o)
-      case java.lang.Boolean.FALSE => elseToks.eval(o)
-      case x:Option[AnyRef] => x.map(thenToks.eval).getOrElse(elseToks.eval(o))
+    def format(o:AnyRef) = condition.eval(o) match {
+      case java.lang.Boolean.TRUE => thenToks.format(o)
+      case java.lang.Boolean.FALSE => elseToks.format(o)
+      case x:Option[AnyRef] => x.map(thenToks.format).getOrElse(elseToks.format(o))
     }
   }
   case class DateConversion(exp:Exp,format:String) extends FormatElement{
     val df = new java.text.SimpleDateFormat(format)
-    def eval(o:AnyRef) = df.format(exp.eval(o) match {
+    def format(o:AnyRef) = df.format(exp.eval(o) match {
       case cal:java.util.Calendar => cal.getTime
       case date:java.util.Date => date
     })
     def chars = ""
   }
   case class ToStringConversion(exp:Exp) extends FormatElement{
-    def eval(o:AnyRef):String = exp.eval(o).toString
+    def format(o:AnyRef):String = exp.eval(o).toString
   }
   
   case class Exp(identifier:String){
@@ -78,9 +78,9 @@ object AST{
   }
   case class Expand(exp:Exp,sep:String,inner:FormatElements) extends FormatElement{
     def chars = exp.chars + ":" + sep
-    def realEval(l:Iterable[AnyRef]):String = l.map(inner.eval(_)) mkString sep
+    def realEval(l:Iterable[AnyRef]):String = l.map(inner.format(_)) mkString sep
     import Java.it2it
-    def eval(o:AnyRef) = exp.eval(o) match{
+    def format(o:AnyRef) = exp.eval(o) match{
       // array or collection or similar
     case l : java.lang.Iterable[AnyRef] => realEval(l)
     case l : Seq[AnyRef] => realEval(l)
@@ -89,7 +89,7 @@ object AST{
   
   case class FormatElements(toks:Seq[FormatElement]){
     def chars = ""
-    def eval(o:AnyRef):String = toks.map(_.eval(o)) mkString "" 
+    def format(o:AnyRef):String = toks.map(_.format(o)) mkString "" 
   }
 }
 
