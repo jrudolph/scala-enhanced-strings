@@ -24,6 +24,9 @@ object AST{
     def chars = str
     def format(o:AnyRef):String = str
   }
+  case class ToStringConversion(exp:Exp) extends FormatElement{
+    def format(o:AnyRef):String = exp.eval(o).toString
+  }
   case class Conditional(condition:Exp,thenToks:FormatElements,elseToks:FormatElements) extends FormatElement{
     def chars =""
     def format(o:AnyRef) = condition.eval(o) match {
@@ -40,8 +43,15 @@ object AST{
     })
     def chars = ""
   }
-  case class ToStringConversion(exp:Exp) extends FormatElement{
-    def format(o:AnyRef):String = exp.eval(o).toString
+  case class Expand(exp:Exp,sep:String,inner:FormatElements) extends FormatElement{
+    def chars = exp.chars + ":" + sep
+    def realEval(l:Iterable[AnyRef]):String = l.map(inner.format(_)) mkString sep
+    import Java.it2it
+    def format(o:AnyRef) = exp.eval(o) match{
+      // array or collection or similar
+    case l : java.lang.Iterable[AnyRef] => realEval(l)
+    case l : Seq[AnyRef] => realEval(l)
+    }
   }
   
   case class Exp(identifier:String){
@@ -75,16 +85,6 @@ object AST{
   }
   case class ParentExp(inner:Exp,parent:String) extends Exp(parent){
     override def eval(o:AnyRef) = inner.eval(super.eval(o))
-  }
-  case class Expand(exp:Exp,sep:String,inner:FormatElements) extends FormatElement{
-    def chars = exp.chars + ":" + sep
-    def realEval(l:Iterable[AnyRef]):String = l.map(inner.format(_)) mkString sep
-    import Java.it2it
-    def format(o:AnyRef) = exp.eval(o) match{
-      // array or collection or similar
-    case l : java.lang.Iterable[AnyRef] => realEval(l)
-    case l : Seq[AnyRef] => realEval(l)
-    }
   }
   
   case class FormatElements(toks:Seq[FormatElement]){
