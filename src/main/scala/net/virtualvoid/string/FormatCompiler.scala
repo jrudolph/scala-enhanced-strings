@@ -31,11 +31,7 @@ object Compiler{
       f ~ dynMethod(e.method(cl),retType)
     }
   }
-  
-  def loop[ST<:List,LT<:List,T](
-    cond:F[ST,LT]=>F[ST**Boolean,LT]
-    ,next:F[ST,LT]=>F[ST**T,LT])(body:F[ST**T,LT]=>F[ST,LT]):F[ST,LT]=>F[ST,LT] = null
-  
+    
   def compileFormatElementList[R<:List,LR<:List,T<:java.lang.Object](elements:FormatElementList,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
     elements.elements.foldLeft(f){(frame,element) => compileElement(element,cl)(frame)}
 
