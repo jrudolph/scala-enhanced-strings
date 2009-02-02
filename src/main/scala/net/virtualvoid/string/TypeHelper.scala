@@ -17,14 +17,12 @@ object TypeHelper {
 
     cl match{
       case Candidate => Some(tp(0))
-      case p:ParameterizedType => {
+      case p:ParameterizedType => 
         genericInstanceType(p.getRawType,Candidate,resolved(p.getActualTypeArguments))
-      }
-      case cl:Class[_] => {
+      case cl:Class[_] => 
         (supertype(cl).toList ++ cl.getGenericInterfaces)
           .flatMap(t => genericInstanceType(t,Candidate,tp).toList)
           .firstOption
-      }
     }
   }
   def main(args:scala.Array[String]):Unit = {
