@@ -11,7 +11,7 @@ object Compiler{
 
   val parser = EnhancedStringFormatParser
   import AST._
-
+  
   def elementType(it:java.lang.reflect.Type,of:Class[_]):Class[_ <: AnyRef] = {
     TypeHelper.genericInstanceType(it,of,Array()) match{
       case Some(cl:java.lang.Class[AnyRef]) => cl
@@ -170,18 +170,24 @@ object Compiler{
       case DateConversion(exp,format) => {
         val retType = exp.returnType(cl)
         
+        val DateClass:Class[java.util.Date] = classOf[java.util.Date]
+        val CalendarClass:Class[java.util.Calendar] = classOf[java.util.Calendar]
+        
         f ~ newInstance(classOf[java.text.SimpleDateFormat]) ~
           dup ~
           ldc(format) ~ 
           method2(_.applyPattern(_)) ~ pop_unit ~
           local[_0,T].load() ~
           (f => 
-            if (classOf[java.util.Date].isAssignableFrom(retType))
-              f ~ compileGetExp(exp,cl,classOf[java.util.Date])
-            else if (classOf[java.util.Calendar].isAssignableFrom(retType))
-              f ~ compileGetExp(exp,cl,classOf[java.util.Calendar]) ~ method(_.getTime)
-            else
-                throw new java.lang.Error("only date or time can be converted")
+            retType match {
+              case x if DateClass.isAssignableFrom(x)     => f ~ 
+                                                               compileGetExp(exp,cl,DateClass)
+              case x if CalendarClass.isAssignableFrom(x) => f ~                
+                                                               compileGetExp(exp,cl,CalendarClass) ~ 
+                                                               method(_.getTime)
+              case _ => throw new java.lang.Error("Expected date- or calendar- typed property. "+
+                                                    cl+" can't be converted.") 
+            }
           ) ~
           method2(_.format(_)) ~
           method2(_.append(_))
