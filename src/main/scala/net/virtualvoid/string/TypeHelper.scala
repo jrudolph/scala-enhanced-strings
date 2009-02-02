@@ -10,12 +10,12 @@ object TypeHelper {
   }
   def genericInstanceType(cl:Type,Candidate:Class[_],tp:RandomAccessSeq[Type]):Option[Type] = {
     def resolved(ts:RandomAccessSeq[Type]):RandomAccessSeq[Type] =
-      ts.map( t => t match{
+      ts.map {
         case cl:Class[_] => cl
         case v:TypeVariable[_] => tp(v.getGenericDeclaration.asInstanceOf[Class[_]].getTypeParameters.indexOf(v))
-      }).toArray
+      }.toArray
 
-    cl match{
+    cl match {
       case Candidate => Some(tp(0))
       case p:ParameterizedType => 
         genericInstanceType(p.getRawType,Candidate,resolved(p.getActualTypeArguments))
