@@ -3,11 +3,12 @@ package net.virtualvoid.string
 object TypeHelper {
   import java.lang.reflect._
 
-  def supertype(cl:Class[_]):Option[Type] = {
-    val res = cl.getGenericSuperclass
-    if (res == null) None
-    else Some(res)
-  }
+  def nullSafe[T](x:T):Option[T] =
+    if (x != null) Some(x) else None
+  
+  def supertype(cl:Class[_]):Option[Type] =
+    nullSafe(cl.getGenericSuperclass)
+
   def genericInstanceType(cl:Type,Candidate:Class[_],tp:RandomAccessSeq[Type]):Option[Type] = {
     def resolved(ts:RandomAccessSeq[Type]):RandomAccessSeq[Type] =
       ts.map {
