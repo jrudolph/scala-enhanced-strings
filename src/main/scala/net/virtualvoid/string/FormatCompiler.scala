@@ -162,7 +162,7 @@ object Compiler{
                 swap ~
                 compileFormatElementList(thens,eleType) ~
                 swap ~
-                local[_0,T].store[R**StringBuilder,LR**AnyRef]()(replace_0))
+                local[_0,T].store[R**StringBuilder,LR**AnyRef]())
         }
         else
           throw new Error("can't use "+retType+" in a conditional")
