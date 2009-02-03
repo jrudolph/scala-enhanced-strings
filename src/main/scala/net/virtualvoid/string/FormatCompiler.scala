@@ -35,6 +35,8 @@ object Compiler{
   def compileFormatElementList[R<:List,LR<:List,T<:java.lang.Object](elements:FormatElementList,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
     elements.elements.foldLeft(f){(frame,element) => compileElement(element,cl)(frame)}
 
+  def id[X]:X=>X = x=>x
+  
   def compileElement[R<:List,LR<:List,T<:java.lang.Object](ele:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = ele match {
       case Literal(str) => 
@@ -95,36 +97,35 @@ object Compiler{
             _ ~
             local[_0,LT].load() ~
             swap ~
-            local[_0,ST].store[S**LT,L**LT]()
+            local[_0,ST].store() ~ id
           
-          f ~
-             local[_0,T].load() ~
-             swap ~
-             local[_0,T].load() ~
-             compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]) ~
-             swap ~
-             foldArray(// index,sb,ele | array
-               _ ~ 
-               swapTopWithLocal0 ~ // index,sb,array | ele
-               swap ~ // index,array,sb
-               compileFormatElementList(inner,eleType) ~ //index,array,sb | ele
-               swap ~
-               local[_0,Array[AnyRef]].store() ~
-               // check if it was latest element or not so we can insert separator
-               swap ~ // sb,index
-               dup_x1 ~ // index,sb,index
-               local[_0,Array[AnyRef]].load() ~ // index,sb,index,array
-               arraylength ~ // index,sb,index,length
-               bipush(1) ~ // index,sb,index,length,1
-               isub ~ // index,sb,index,length-1
-               isub ~ // index,sb,index-(length-1)
-               ifeq2( // index,sb
-                 f=>f, //FIXME: use id func here
-                 ldc(sep) ~ method2(_.append(_)) // append separator if we are not at the end of the array
-               )
-             ) ~
-             swap ~
-             local[_0,T].store[R**StringBuilder,LR**Array[AnyRef]]()
+          f ~  //sb | o
+            local[_0,T].load() ~ // sb,o
+            dup ~ //sb,o,o
+            compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]) ~ //sb,o,array
+            newInstance(classOf[StringBuilder]) ~
+            foldArray( // sb,o,index,sb,ele | array
+              // add separator if nothing was added yet 
+              _ ~
+                swap ~
+                dup ~
+                method(_.length) ~
+                ifeq2(
+                  f=>f,
+                  _ ~ ldc(sep) ~ method2(_.append(_))
+                ) ~
+                swap ~ // sb,o,index,sb,ele | array
+
+                // format element
+                swapTopWithLocal0 ~ //sb,o,index,sb,array | ele
+                swap ~
+                compileFormatElementList(inner,eleType) ~ //sb,o,index,array,sb | ele
+                swap ~
+                local[_0,Array[AnyRef]].store() ~ id// sb,o,index,sb | array
+            ) ~ // sb,o,sb | array
+            swap ~ // sb,sb,o | array
+            local[_0,T].store() ~
+            method2(_.append(_))
         }
         else
           throw new java.lang.Error("can only iterate over iterables and arrays right now")
