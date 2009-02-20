@@ -22,13 +22,13 @@ object Compiler{
   def compileGetExp[R<:List,LR<:List,T,Ret](exp:Exp,cl:Class[T],retType:Class[Ret])(f:F[R**T,LR]):F[R**Ret,LR] = exp match{
     case p@ParentExp(inner,parent) =>{
       val m = p.method(cl)
-      f ~ dynMethod(m,classOf[AnyRef]) ~ 
+      f ~ invokemethod1Dyn(m,classOf[AnyRef]) ~ 
        compileGetExp(inner,m.getReturnType.asInstanceOf[Class[Object]],retType)
     }
     case ThisExp =>
       f ~ checkcast(retType) // TODO: don't know why we need this, examine it
     case e:Exp => {
-      f ~ dynMethod(e.method(cl),retType)
+      f ~ invokemethod1Dyn(e.method(cl),retType)
     }
   }
     
@@ -40,12 +40,12 @@ object Compiler{
   def compileElement[R<:List,LR<:List,T<:java.lang.Object](ele:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
     = ele match {
       case Literal(str) => 
-        f ~ ldc(str) ~ method2(_.append(_))
+        f ~ ldc(str) ~ invokemethod2(_.append(_))
       case ToStringConversion(e) =>
         f ~ local[_0,T].load() ~
           compileGetExp(e,cl,classOf[AnyRef]) ~ 
-          method(_.toString) ~ 
-          method2(_.append(_))
+          invokemethod1(_.toString) ~ 
+          invokemethod2(_.append(_))
       case Expand(exp,sep,inner) => {
         val retType = exp.returnType(cl)
 
@@ -57,29 +57,29 @@ object Compiler{
              swap ~ // save one instance of T for later
              local[_0,T].load() ~
              compileGetExp(exp,cl,classOf[java.lang.Iterable[AnyRef]]) ~
-             method(_.iterator) ~
+             invokemethod1(_.iterator) ~
              local[_0,java.util.Iterator[AnyRef]].store() ~
              target
           
           jmpTarget ~
              local[_0,java.util.Iterator[AnyRef]].load() ~
-             method(_.hasNext) ~
+             invokemethod1(_.hasNext) ~
              ifeq(f =>
                f ~
                 local[_0,java.util.Iterator[AnyRef]].load() ~
                 swap ~
                 local[_0,java.util.Iterator[AnyRef]].load() ~
-                method(_.next) ~
+                invokemethod1(_.next) ~
                 checkcast(eleType) ~
                 local[_0,AnyRef].store() ~
                 compileFormatElementList(inner,eleType) ~
                 swap ~
                 dup ~
                 local[_0,java.util.Iterator[AnyRef]].store() ~
-                method(_.hasNext) ~
+                invokemethod1(_.hasNext) ~
                 ifeq(f =>
                    f~ldc(sep:jString) ~
-                    method2(_.append(_)) ~
+                    invokemethod2(_.append(_)) ~
                     jmp(jmpTarget)) ~ //todo: introduce ifeq(thenCode,elseTarget)
                 jmp(jmpTarget)) ~
              swap ~
@@ -109,10 +109,10 @@ object Compiler{
               _ ~
                 swap ~
                 dup ~
-                method(_.length) ~
+                invokemethod1(_.length) ~
                 ifeq2(
                   f=>f,
-                  _ ~ ldc(sep) ~ method2(_.append(_))
+                  _ ~ ldc(sep) ~ invokemethod2(_.append(_))
                 ) ~
                 swap ~ // sb,o,index,sb,ele | array
 
@@ -125,7 +125,7 @@ object Compiler{
             ) ~ // sb,o,sb | array
             swap ~ // sb,sb,o | array
             local[_0,T].store() ~
-            method2(_.append(_))
+            invokemethod2(_.append(_))
         }
         else
           throw new java.lang.Error("can only iterate over iterables and arrays right now")
@@ -139,7 +139,7 @@ object Compiler{
             (if (retType == java.lang.Boolean.TYPE)
                compileGetExp(inner,cl,classOf[Boolean])
              else 
-               compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ method(_.booleanValue)
+               compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ invokemethod1(_.booleanValue)
             ) ~
             ifeq2(
               compileFormatElementList(elses,cl),
@@ -151,12 +151,12 @@ object Compiler{
             local[_0,T].load() ~
             compileGetExp(inner,cl,classOf[Option[AnyRef]]) ~
             dup ~
-            method(_.isDefined) ~
+            invokemethod1(_.isDefined) ~
             ifeq2(
               _ ~ pop ~ compileFormatElementList(elses,cl),
               _ ~ 
                 checkcast(classOf[Some[AnyRef]]) ~
-                method(_.get) ~
+                invokemethod1(_.get) ~
                 local[_0,T].load() ~
                 swap ~
                 local[_0,AnyRef].store() ~
@@ -177,7 +177,7 @@ object Compiler{
         f ~ newInstance(classOf[java.text.SimpleDateFormat]) ~
           dup ~
           ldc(format) ~ 
-          method2(_.applyPattern(_)) ~ pop_unit ~
+          invokemethod2(_.applyPattern(_)) ~ pop_unit ~
           local[_0,T].load() ~
           (f => 
             retType match {
@@ -185,13 +185,13 @@ object Compiler{
                                                                compileGetExp(exp,cl,DateClass)
               case x if CalendarClass.isAssignableFrom(x) => f ~                
                                                                compileGetExp(exp,cl,CalendarClass) ~ 
-                                                               method(_.getTime)
+                                                               invokemethod1(_.getTime)
               case _ => throw new java.lang.Error("Expected date- or calendar- typed property. "+
                                                     cl+" can't be converted.") 
             }
           ) ~
-          method2(_.format(_)) ~
-          method2(_.append(_))
+          invokemethod2(_.format(_)) ~
+          invokemethod2(_.append(_))
       }
     }
   def compile[T<:AnyRef](format:String,cl:Class[T]):T=>jString = {
@@ -201,7 +201,7 @@ object Compiler{
       ~ local[_0,T].store()
       ~ newInstance(classOf[StringBuilder])
       ~ compileFormatElementList(elements,cl)
-      ~ method(_.toString)
+      ~ invokemethod1(_.toString)
      )
   }
 }
