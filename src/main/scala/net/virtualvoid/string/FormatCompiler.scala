@@ -6,7 +6,7 @@ object Compiler{
   import net.virtualvoid.bytecode.Bytecode
   import net.virtualvoid.bytecode.ASMCompiler
   import Bytecode._
-  import Bytecode.Operations._
+  import Bytecode.Instructions._
   import Bytecode.Implicits._
 
   val parser = EnhancedStringFormatParser
