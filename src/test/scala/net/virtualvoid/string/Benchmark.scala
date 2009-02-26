@@ -69,8 +69,20 @@ object Benchmark {
 		  val avg = results.foldLeft(0l)(_+_)/averageOf
 		  val variance = results.foldLeft(0l)((sum,x)=> sum + (x-avg)*(x-avg))/(averageOf-1.)
 		  val stdev = Math.pow(variance,.5)
+		  
+		  def ind(x:long) = (x-avg) match{
+		    case s if s <= -2*stdev => "↡"
+		    case s if s <= -stdev   => "↓"
+		    case s if s <= -stdev/2.=> "↘"
+		    case s if s <= stdev/2  => "→"
+		    case s if s <= stdev    => "↗"
+		    case s if s <= 2*stdev  => "↑"
+		    case _	                => "↟"
+		  }
+    
+		  val indicators = results.foldLeft("")((str,x)=> str + ind(x))
 	    	  
-	      System.out.println(factory.getClass.getSimpleName+":"+formatName+" Average of "+averageOf+" runs: "+avg/1e6+" ms +/- "+stdev/1e6+" ms = "+stdev*100./avg+"%")
+	      System.out.println(factory.getClass.getSimpleName+":"+formatName+" Average of "+averageOf+" runs: "+avg/1e6+" ms +/- "+stdev/1e6+" ms = "+stdev*100./avg+"%"+" ["+indicators+"]")
 	  }
   }
 }
