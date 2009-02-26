@@ -50,6 +50,8 @@ object Benchmark {
 	val times = args(0).toInt
 	val warmup = args(1) == "w"
 	val withCompileTimes = args(1) == "c"
+ 
+	val averageOf = 100
 	
 	for((formatName,format)  <- formats;
 	  	factory <- formatFactories)
@@ -61,7 +63,14 @@ object Benchmark {
 		  if (warmup)
 			  benchmark(times*10,formatter)
 		  
-		  System.out.println(factory.getClass.getSimpleName+":"+formatName+" "+(benchmark(times,formatter)/1e6)+" ms")
+	      val results = for(i <- 0 until averageOf) yield benchmark(times,formatter)
+		  //for(res <- results) System.out.println(res/1e6)
+       
+		  val avg = results.foldLeft(0l)(_+_)/averageOf
+		  val variance = results.foldLeft(0l)((sum,x)=> sum + (x-avg)*(x-avg))/(averageOf-1.)
+		  val stdev = Math.pow(variance,.5)
+	    	  
+	      System.out.println(factory.getClass.getSimpleName+":"+formatName+" Average of "+averageOf+" runs: "+avg/1e6+" ms +/- "+stdev/1e6+" ms = "+stdev*100./avg+"%")
 	  }
   }
 }
