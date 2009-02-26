@@ -21,6 +21,7 @@ object Benchmark {
   val formatFactories = List(ObjectFormatter,FormatCompiler)
   
   def benchmark(times:Int,formatter:IObjectFormatter[Test]) = {
+        System.out.println("run")
     val startTime = System.nanoTime
  
 	var i = times
@@ -51,7 +52,7 @@ object Benchmark {
 	val warmup = args(1) == "w"
 	val withCompileTimes = args(1) == "c"
  
-	val averageOf = 100
+	val averageOf = 20
 	
 	for((formatName,format)  <- formats;
 	  	factory <- formatFactories)
@@ -60,29 +61,36 @@ object Benchmark {
 	  else {
 		  val formatter = factory.formatter(classOf[Test],format)
 
+		  val name = factory.getClass.getSimpleName+":"+formatName
+		  
+		  System.out.println(" + Warming up for "+name)
 		  if (warmup)
 			  benchmark(times*10,formatter)
+		  System.out.println(" - Warming up finished for "+name)
 		  
-	      val results = for(i <- 0 until averageOf) yield benchmark(times,formatter)
+		  System.out.println(" + Running "+name)
+
+	      val results:Array[Long] = (0 until averageOf).map(i => benchmark(times,formatter)).toArray
+		  System.out.println(" - Finished running "+name)
 		  //for(res <- results) System.out.println(res/1e6)
        
-		  val avg = results.foldLeft(0l)(_+_)/averageOf
-		  val variance = results.foldLeft(0l)((sum,x)=> sum + (x-avg)*(x-avg))/(averageOf-1.)
+		  val avg = results.foldLeft(0.)(_+_.toDouble)/averageOf
+		  val variance = results.foldLeft(0d)((sum,x)=> sum + (x-avg)*(x-avg))/(averageOf-1.)
 		  val stdev = Math.pow(variance,.5)
 		  
 		  def ind(x:long) = (x-avg) match{
-		    case s if s <= -2*stdev => "↡"
-		    case s if s <= -stdev   => "↓"
-		    case s if s <= -stdev/2.=> "↘"
-		    case s if s <= stdev/2  => "→"
-		    case s if s <= stdev    => "↗"
-		    case s if s <= 2*stdev  => "↑"
-		    case _	                => "↟"
+		    case s if s <= -2*stdev => '↡'
+		    case s if s <= -stdev   => '↓'
+		    case s if s <= -stdev/2.=> '↘'
+		    case s if s <= stdev/2  => '→'
+		    case s if s <= stdev    => '↗'
+		    case s if s <= 2*stdev  => '↑'
+		    case _	                => '↟'
 		  }
     
-		  val indicators = results.foldLeft("")((str,x)=> str + ind(x))
-	    	  
-	      System.out.println(factory.getClass.getSimpleName+":"+formatName+" Average of "+averageOf+" runs: "+avg/1e6+" ms +/- "+stdev/1e6+" ms = "+stdev*100./avg+"%"+" ["+indicators+"]")
+		  val indicators:CharSequence = results.map(ind(_))
+		  
+	      System.out.println(name+" Average of "+averageOf+" runs: "+avg/1e6+" ms +/- "+stdev/1e6+" ms = "+stdev*100./avg+"%"+"\n["+indicators+"]")
 	  }
   }
 }
