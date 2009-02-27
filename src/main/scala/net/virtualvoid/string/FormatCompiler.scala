@@ -12,14 +12,19 @@ object Compiler{
   val parser = EnhancedStringFormatParser
   import AST._
   
-  def elementType(it:java.lang.reflect.Type,of:Class[_]):Class[_ <: AnyRef] = {
+  def elementType(it:java.lang.reflect.Type,of:Class[_])
+  	:Class[_ <: AnyRef] = {
     TypeHelper.genericInstanceType(it,of,Array()) match{
       case Some(cl:java.lang.Class[AnyRef]) => cl
       case _ => throw new java.lang.Error("Can't get element type of "+it)
     }
   }
 
-  def compileGetExp[R<:List,LR<:List,T,Ret](exp:Exp,cl:Class[T],retType:Class[Ret])(f:F[R**T,LR]):F[R**Ret,LR] = exp match{
+  def compileGetExp[R<:List,LR<:List,T,Ret](exp:Exp
+                                            ,cl:Class[T]
+                                            ,retType:Class[Ret])
+                                           (f:F[R**T,LR]):F[R**Ret,LR] = 
+  exp match {
     case p@ParentExp(inner,parent) =>{
       val m = p.method(cl)
       f ~ invokemethod1Dyn(m,classOf[AnyRef]) ~ 
@@ -32,12 +37,18 @@ object Compiler{
     }
   }
     
-  def compileFormatElementList[R<:List,LR<:List,T<:java.lang.Object](elements:FormatElementList,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
-    elements.elements.foldLeft(f){(frame,element) => compileElement(element,cl)(frame)}
+  def compileFormatElementList[R<:List,LR<:List,T<:java.lang.Object]
+                 (elements:FormatElementList,cl:Class[T])
+                 (f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T] =
+    elements.elements.foldLeft(f){(frame,element) => 
+      compileElement(element,cl)(frame)}
 
   def id[X]:X=>X = x=>x
   
-  def compileElement[R<:List,LR<:List,T<:java.lang.Object](ele:FormatElement,cl:Class[T])(f:F[R**StringBuilder,LR**T]):F[R**StringBuilder,LR**T]
+  def compileElement[R<:List,LR<:List,T<:java.lang.Object]
+                     (ele:FormatElement,cl:Class[T])
+                     (f:F[R**StringBuilder,LR**T])
+                     :F[R**StringBuilder,LR**T]
     = ele match {
       case Literal(str) => 
         f ~ ldc(str) ~ invokemethod2(_.append(_))
@@ -50,7 +61,9 @@ object Compiler{
         val retType = exp.returnType(cl)
 
         if (classOf[java.lang.Iterable[_]].isAssignableFrom(retType)){
-          val eleType:Class[AnyRef] = elementType(exp.genericReturnType(cl),classOf[java.lang.Iterable[_]]).asInstanceOf[Class[AnyRef]]
+          val eleType:Class[AnyRef] = elementType(exp.genericReturnType(cl)
+                                                  ,classOf[java.lang.Iterable[_]])
+                                                  .asInstanceOf[Class[AnyRef]]
           val jmpTarget =
             f ~ 
              local[_0,T].load() ~
@@ -102,7 +115,7 @@ object Compiler{
           f ~  //sb | o
             local[_0,T].load() ~ // sb,o
             dup ~ //sb,o,o
-            compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]) ~ //sb,o,array
+            compileGetExp(exp,cl,retType.asInstanceOf[Class[Array[AnyRef]]]) ~
             newInstance(classOf[StringBuilder]) ~
             foldArray( // sb,o,index,sb,ele | array
               // add separator if nothing was added yet 
@@ -119,7 +132,7 @@ object Compiler{
                 // format element
                 swapTopWithLocal0 ~ //sb,o,index,sb,array | ele
                 swap ~
-                compileFormatElementList(inner,eleType) ~ //sb,o,index,array,sb | ele
+                compileFormatElementList(inner,eleType) ~ 
                 swap ~
                 local[_0,Array[AnyRef]].store() ~ id// sb,o,index,sb | array
             ) ~ // sb,o,sb | array
@@ -128,25 +141,30 @@ object Compiler{
             invokemethod2(_.append(_))
         }
         else
-          throw new java.lang.Error("can only iterate over iterables and arrays right now")
+          throw new java.lang.Error("can only iterate over "+
+                                      "iterables and arrays right now")
       }
       case Conditional(inner,thens,elses) => {
         val retType = inner.returnType(cl)
 
-        if (retType == java.lang.Boolean.TYPE || classOf[java.lang.Boolean].isAssignableFrom(retType)){
+        if (retType == java.lang.Boolean.TYPE || 
+              classOf[java.lang.Boolean].isAssignableFrom(retType)){
           f ~ 
             local[_0,T].load() ~
             (if (retType == java.lang.Boolean.TYPE)
                compileGetExp(inner,cl,classOf[Boolean])
              else 
-               compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ ~ invokemethod1(_.booleanValue)
+               compileGetExp(inner,cl,classOf[java.lang.Boolean]) _ 
+             ~ invokemethod1(_.booleanValue)
             ) ~
             ifeq2(
               compileFormatElementList(elses,cl),
               compileFormatElementList(thens,cl))
         }
         else if (classOf[Option[AnyRef]].isAssignableFrom(retType)){
-          val eleType = elementType(inner.genericReturnType(cl),classOf[Option[_]]).asInstanceOf[Class[AnyRef]]
+          val eleType = elementType(inner.genericReturnType(cl)
+                                    ,classOf[Option[_]])
+            .asInstanceOf[Class[AnyRef]]
           f ~
             local[_0,T].load() ~
             compileGetExp(inner,cl,classOf[Option[AnyRef]]) ~
@@ -181,13 +199,15 @@ object Compiler{
           local[_0,T].load() ~
           (f => 
             retType match {
-              case x if DateClass.isAssignableFrom(x)     => f ~ 
-                                                               compileGetExp(exp,cl,DateClass)
-              case x if CalendarClass.isAssignableFrom(x) => f ~                
-                                                               compileGetExp(exp,cl,CalendarClass) ~ 
-                                                               invokemethod1(_.getTime)
-              case _ => throw new java.lang.Error("Expected date- or calendar- typed property. "+
-                                                    cl+" can't be converted.") 
+              case x if DateClass.isAssignableFrom(x)     => 
+                f ~ compileGetExp(exp,cl,DateClass)
+              case x if CalendarClass.isAssignableFrom(x) => 
+                f ~                
+                  compileGetExp(exp,cl,CalendarClass) ~ 
+                  invokemethod1(_.getTime)
+              case _ => throw new java.lang.Error(
+                "Expected date- or calendar- typed property. "+
+                cl+" can't be converted.") 
             }
           ) ~
           invokemethod2(_.format(_)) ~
@@ -207,8 +227,9 @@ object Compiler{
 }
 
 object FormatCompiler extends IObjectFormatterFactory{
-  def formatter[T<:AnyRef](clazz:Class[T],fmt:String) = new IObjectFormatter[T]{
-    val compiler = Compiler.compile[T](fmt,clazz)
-    def format(o:T):String = compiler(o)
-  }
+  def formatter[T<:AnyRef](clazz:Class[T],fmt:String) = 
+	  new IObjectFormatter[T]{
+	  	val compiler = Compiler.compile[T](fmt,clazz)
+	  	def format(o:T):String = compiler(o)
+  	  }
 }
