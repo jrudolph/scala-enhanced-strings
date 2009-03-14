@@ -77,7 +77,7 @@ object Compiler{
           jmpTarget ~
              local[_0,java.util.Iterator[AnyRef]].load() ~
              invokemethod1(_.hasNext) ~
-             ifeq(f =>
+             ifne(f =>
                f ~
                 local[_0,java.util.Iterator[AnyRef]].load() ~
                 swap ~
@@ -90,7 +90,7 @@ object Compiler{
                 dup ~
                 local[_0,java.util.Iterator[AnyRef]].store() ~
                 invokemethod1(_.hasNext) ~
-                ifeq(f =>
+                ifne(f =>
                    f~ldc(sep:jString) ~
                     invokemethod2(_.append(_)) ~
                     jmp(jmpTarget)) ~ //todo: introduce ifeq(thenCode,elseTarget)
