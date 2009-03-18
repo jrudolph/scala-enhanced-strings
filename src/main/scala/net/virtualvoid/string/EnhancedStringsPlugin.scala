@@ -35,13 +35,21 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	      case _ => tree
 	    }
      
+	    def compileElement(el:AST.FormatElement):Tree = el match{
+	      case AST.Literal(str) => Literal(Constant(str))
+	    }
+	    def compile(els:AST.FormatElementList,tree:Tree):Tree =
+	    	if (els.elements.size == 1)
+	    		compileElement(els.elements(0))
+	    	else
+	    		tree//Literal(Constant("long format"))
+     
 	    /** When using <code>postTransform</code>, each node is
 	     *  visited after its children.
 	     */
 	    def postTransform(tree: Tree): Tree = tree match {
 	      case Literal(Constant(str:String)) =>
-	          println("post-transforming literal string "+ str)
-	          tree
+	          compile(EnhancedStringFormatParser.parse(str),tree)
 	      case _ => tree
 	    }
 	
