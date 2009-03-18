@@ -22,13 +22,13 @@ object ParserSpecs extends Specification {
     "#this[]*" in {"#this[]*" must beParsedAs(expand(ThisExp,""))}
 
     //escaped square brackets
-    "[[abc]]" in {"[[abc]]" must beParsedAs(Literal("[abc]"))}
+    "#[abc#]" in {"#[abc#]" must beParsedAs(Literal("[abc]"))}
 
     //escaped hash
     "##abc" in {"##abc" must beParsedAs(Literal("#abc"))}
 
     // more complex escape situations
-    "##]] ####blub ##[[" in {"##]] ####blub ##[[" must beParsedAs(Literal("#] ##blub #["))}
+    "###] ####blub ###[" in {"###] ####blub ###[" must beParsedAs(Literal("#] ##blub #["))}
 
     // test weird control combinations
     "Dots in normal literals 'This is a sentence.'" in {"This is a sentence." must beParsedAs(Literal("This is a sentence."))}
@@ -42,6 +42,10 @@ object ParserSpecs extends Specification {
     
     // conditionals
     "conditionals" in {"#this?[#this|Nope]" must beParsedAs(Conditional(ThisExp,toks(ToStringConversion(ThisExp)),toks(Literal("Nope"))))}
+    "complex conditionals" in {"#{x.getClass.getMethods}?[#it|None]" must beParsedAs(Conditional(
+      ParentExp(ParentExp(Exp("getMethods"),"getClass"),"x")
+      ,toks(ToStringConversion(Exp("it"))),toks(Literal("None"))))}
+    "conditional and expansion" in {"#x[#it?[#it|Leer]]{,}*" must beParsedAs(Expand(Exp("x"),",",toks(Conditional(Exp("it"),toks(ToStringConversion(Exp("it"))),toks(Literal("Leer"))))))}
   }
 
   // helper methods

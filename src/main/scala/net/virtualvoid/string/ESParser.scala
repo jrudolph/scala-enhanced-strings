@@ -108,7 +108,7 @@ object EnhancedStringFormatParser extends RegexParsers{
 
   implicit def extendParser[T](x:Parser[T]):EParser[T] = EParser[T](x)
 
-  def escapedByDoubling(char:String):Parser[String] = char ~ char ^^ (x=>char)
+  def escapedByDoubling(char:String):Parser[String] = "#" ~ char ^^ (x=>char)
 
   val expStartChar = '#'
 
