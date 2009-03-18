@@ -35,8 +35,14 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	      case _ => tree
 	    }
      
+	    def compileExpression(exp:AST.Exp):Tree = exp match{
+	      case AST.ThisExp => This("")
+	      //case AST.ParentExp(inner,parent) => This("")
+	      case AST.Exp(identifier) => Ident(identifier)
+	    }
 	    def compileElement(el:AST.FormatElement):Tree = el match{
 	      case AST.Literal(str) => Literal(Constant(str))
+	      case AST.ToStringConversion(exp) => compileExpression(exp)
 	    }
 	    def compile(els:AST.FormatElementList,tree:Tree):Tree =
 	    	if (els.elements.size == 1)
@@ -48,6 +54,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	     *  visited after its children.
 	     */
 	    def postTransform(tree: Tree): Tree = tree match {
+	      case This(qual) => {System.out.println(tree+":"+qual+qual.getClass+":"+qual.toString.length);tree}
 	      case Literal(Constant(str:String)) =>
 	          compile(EnhancedStringFormatParser.parse(str),tree)
 	      case _ => tree
