@@ -27,7 +27,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	
 	  def newTransformer(unit: CompilationUnit) = new ESTransformer
     
-    class ESTransformer extends /*Typing*/ Transformer {
+    class ESTransformer extends Transformer {
 	    /** When using <code>preTransform</code>, each node is
 	     *  visited before its children.
 	     */
@@ -52,7 +52,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	    	if (els.elements.size == 1)
 	    		compileElement(els.elements(0))
 	    	else
-	    		tree//Literal(Constant("long format"))
+	    		tree
      
 	    /** When using <code>postTransform</code>, each node is
 	     *  visited after its children.
