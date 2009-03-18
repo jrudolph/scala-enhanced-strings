@@ -34,11 +34,15 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	    def preTransform(tree: Tree): Tree = tree match {
 	      case _ => tree
 	    }
+	    def compileParentExpressionInner(inner:AST.Exp,outer:Tree):Tree = inner match {
+	      case AST.ParentExp(inner,parent) => compileParentExpressionInner(inner,Select(outer,parent))
+	      case _ => inner match {case AST.Exp(id) => Select(outer,id)}
+	    }
      
 	    def compileExpression(exp:AST.Exp):Tree = exp match{
 	      case AST.ThisExp => This("")
-	      //case AST.ParentExp(inner,parent) => This("")
-	      case AST.Exp(identifier) => Ident(identifier)
+	      case AST.ParentExp(inner,parent) => compileParentExpressionInner(inner,Ident(parent))
+	      case _ => exp match {case AST.Exp(identifier) => Ident(identifier)}
 	    }
 	    def compileElement(el:AST.FormatElement):Tree = el match{
 	      case AST.Literal(str) => Literal(Constant(str))
