@@ -1,0 +1,4 @@
+<plugin>
+  <name>enhanced-strings</name>
+  <classname>net.virtualvoid.string.EnhancedStringsPlugin</classname>
+</plugin>
