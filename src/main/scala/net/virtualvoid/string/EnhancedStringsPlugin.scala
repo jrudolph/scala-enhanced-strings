@@ -55,6 +55,11 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	    		  							     Apply(Select(compileExpression(exp),"map")
 	    		  							    		 ,List(Function(List(it),compile(inner)))),"mkString")
                                                ,List(Literal(Constant(sep))))
+	      case AST.Conditional(cond,thenEls,elseEls) =>
+	        Match(compileExpression(cond),List(
+	          CaseDef(Apply(Ident("Some"),List(Bind("it",Ident("_")))),compile(thenEls)),
+	          CaseDef(Ident("None"),compile(elseEls))
+	        ))
 	    }
 	    def compile(els:AST.FormatElementList):Tree =
 	    	els.elements.size match {
