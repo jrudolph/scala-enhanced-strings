@@ -73,8 +73,12 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	     */
 	    def postTransform(tree: Tree): Tree = tree match {
 	      case This(qual) => {System.out.println(tree+":"+qual+qual.getClass+":"+qual.toString.length);tree}
-	      case Literal(Constant(str:String)) =>
+	      case Literal(Constant(str:String)) => 
+	        try {
 	          compile(EnhancedStringFormatParser.parse(str))
+	        } catch {
+	          case p:ParseException => error(p.getMessage);tree
+	        }
 	      case _ => tree
 	    }
 	
