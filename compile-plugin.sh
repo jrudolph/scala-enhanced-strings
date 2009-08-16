@@ -1,3 +1,3 @@
 mvn package
 zip target/objectformatter-1.0-SNAPSHOT.jar scalac-plugin.xml
-scala -Xplugin:target/objectformatter-1.0-SNAPSHOT.jar 
+./with-plugin.sh
