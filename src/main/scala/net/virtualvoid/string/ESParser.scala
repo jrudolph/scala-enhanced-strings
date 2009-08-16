@@ -100,6 +100,8 @@ object AST{
   }
 }
 
+class ParseException(msg:String) extends Exception(msg)
+
 object EnhancedStringFormatParser extends RegexParsers{
   import AST._
   
@@ -159,6 +161,6 @@ object EnhancedStringFormatParser extends RegexParsers{
   def parse(input:String):FormatElementList = 
     phrase(tokens)(new scala.util.parsing.input.CharArrayReader(input.toCharArray)) match {
       case Success(res,_) => res
-      case x:NoSuccess => error(x.msg)
+      case x:NoSuccess => throw new ParseException(x.msg)
     }
 }
