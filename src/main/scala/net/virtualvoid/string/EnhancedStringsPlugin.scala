@@ -43,7 +43,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	    }
      
 	    def compileExpression(exp:AST.Exp):Tree = exp match{
-	      case AST.ThisExp => This("")
+	      case AST.ThisExp => Ident("it")
 	      case AST.ParentExp(inner,parent) => compileParentExpressionInner(inner,Ident(parent))
 	      case _ => exp match {case AST.Exp(identifier) => Ident(identifier)}
 	    }
