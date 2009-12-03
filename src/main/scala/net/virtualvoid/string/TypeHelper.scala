@@ -35,12 +35,12 @@ object TypeHelper {
    * ParameterizedType(Iterable,E)    [String]=> resolved: TypeVariable(E,Collection) => String
    * Iterable                         [String]=> String
    */
-  def genericInstanceType(cl:Type,Candidate:Class[_],tp:RandomAccessSeq[Type]):Option[Type] = {
-    def resolved(ts:RandomAccessSeq[Type]):RandomAccessSeq[Type] =
+  def genericInstanceType(cl: Type, Candidate: Class[_], tp: IndexedSeq[Type]): Option[Type] = {
+    def resolved(ts: IndexedSeq[Type]): IndexedSeq[Type] =
       ts.map {
         case cl:Class[_] => cl
         case v:TypeVariable[_] => tp(v.getGenericDeclaration.asInstanceOf[Class[_]].getTypeParameters.indexOf(v))
-      }.toArray
+      }.toArray[Type]
 
     cl match {
       case Candidate => Some(tp(0))
@@ -54,6 +54,6 @@ object TypeHelper {
   }
   def main(args:scala.Array[String]):Unit = {
     System.out.println(genericInstanceType(classOf[ProcessBuilder].getMethod("command").getGenericReturnType
-      ,classOf[java.lang.Iterable[_]],scala.Array()))
+      ,classOf[java.lang.Iterable[_]],scala.Array[Type]()))
   }
 }
