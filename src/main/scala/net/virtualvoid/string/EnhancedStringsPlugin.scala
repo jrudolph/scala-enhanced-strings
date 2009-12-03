@@ -5,7 +5,7 @@ import nsc.Global
 import nsc.Phase
 import nsc.plugins.Plugin
 import nsc.plugins.PluginComponent
-import nsc.transform.Transform
+import nsc.transform.{Transform, TypingTransformers}
 import nsc.symtab.Flags
 
 class EnhancedStringsPlugin(val global: Global) extends Plugin {
@@ -15,20 +15,20 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
   val description = "allows variable interpolation in strings"
   val components = List[PluginComponent](Component)
   
-  private object Component extends PluginComponent with Transform{
+  private object Component extends PluginComponent with Transform with TypingTransformers{
 	   import global._
 	   import global.definitions._
 
 	   val global = EnhancedStringsPlugin.this.global
-	   val runsAfter = "parser"
+	   val runsAfter = "typer"
 	  /** The phase name of the compiler plugin
 	   *  @todo Adapt to specific plugin.
 	   */
 	  val phaseName = "enhanced-strings"
 	
-	  def newTransformer(unit: CompilationUnit) = new ESTransformer
+	  def newTransformer(unit: CompilationUnit) = new ESTransformer(unit)
     
-    class ESTransformer extends Transformer {
+    class ESTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
 		val it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
       
 	    /** When using <code>preTransform</code>, each node is
@@ -75,7 +75,8 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	      case This(qual) => {System.out.println(tree+":"+qual+qual.getClass+":"+qual.toString.length);tree}
 	      case Literal(Constant(str:String)) => 
 	        try {
-	          compile(EnhancedStringFormatParser.parse(str))
+	          typedPos(tree.pos)(compile(EnhancedStringFormatParser.parse(str)))
+	          //localTyper.typed(atPos(tree.pos){compile(EnhancedStringFormatParser.parse(str))})
 	        } catch {
 	          case p:ParseException => error(p.getMessage);tree
 	        }
