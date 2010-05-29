@@ -20,7 +20,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	   import global.definitions._
 
 	   val global = EnhancedStringsPlugin.this.global
-	   override val runsAfter = List("typer")
+	   override val runsAfter = List("parser")
 	  /** The phase name of the compiler plugin
 	   *  @todo Adapt to specific plugin.
 	   */
