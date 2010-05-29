@@ -30,6 +30,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
     
     class ESTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
         localTyper = analyzer.newTyper(analyzer.rootContext(unit, EmptyTree, false))
+    
 		val it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
       
 	    /** When using <code>preTransform</code>, each node is
@@ -58,7 +59,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	      case AST.ToStringConversion(exp) => Select(compileExpression(exp),"toString")
 	      case AST.Expand(exp,sep,inner) => Apply(
 	    		  							   Select(
-	    		  							     Apply(Select(compileExpression(exp),"map")
+	    		  							     Apply(Select(compileExpression(exp), "map")
 	    		  							    		 ,List(Function(List(it),compile(inner)))),"mkString")
                                                ,List(Literal(Constant(sep))))
 	      case AST.Conditional(cond,thenEls,elseEls) =>
