@@ -63,9 +63,11 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	    		  							    		 ,List(Function(List(it),compile(inner)))),"mkString")
                                                ,List(Literal(Constant(sep))))
 	      case AST.Conditional(cond,thenEls,elseEls) =>
-	        Match(compileExpression(cond),List(
+	        Match(Typed(compileExpression(cond), Ident("Any".toTypeName)),List(
 	          CaseDef(Apply(Ident("Some"),List(Bind("it",Ident("_")))),compile(thenEls)),
-	          CaseDef(Ident("None"),compile(elseEls))
+	          CaseDef(Ident("None"),compile(elseEls)),
+	          CaseDef(Bind("it", Literal(Constant(true))), compile(thenEls)),
+	          CaseDef(Literal(Constant(false)), compile(elseEls))
 	        ))
 	    }
 	    
