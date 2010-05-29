@@ -5,6 +5,7 @@ import scala.util.parsing.combinator._
 import scala.util.parsing.combinator.lexical._
 import scala.util.parsing.combinator.syntactical._
 import scala.util.parsing.syntax._
+import scala.util.parsing.input._
 
 object Java{
   implicit def it2it[T](it:java.lang.Iterable[T]):Iterable[T] = new Iterable[T] {
@@ -17,7 +18,7 @@ object Java{
 }
 
 object AST{
-  trait FormatElement {
+  trait FormatElement extends Positional {
     def format(o:AnyRef):String
   }  
   case class Literal(str:String) extends FormatElement{
@@ -54,7 +55,7 @@ object AST{
     }
   }
   
-  case class Exp(identifier:String){
+  case class Exp(identifier:String) extends Positional {
     def chars = identifier
 
     import java.lang.reflect.{Method}
@@ -124,8 +125,8 @@ object EnhancedStringFormatParser extends RegexParsers{
     idPart ~ opt("." ~> id) ^^ {case str ~ Some(inner) => ParentExp(inner,str)
                                 case str ~ None => Exp(str)}
 
-  def exp:Parser[Exp] = expStartChar ~>
-    (id | extendParser("{") ~!> id <~! "}")
+  def exp: Parser[Exp] = positioned(expStartChar ~>
+    (id | extendParser("{") ~!> id <~! "}"))
   
   def expAsString:Parser[FormatElement] = exp ^^ {case exp => ToStringConversion(exp)}
 
