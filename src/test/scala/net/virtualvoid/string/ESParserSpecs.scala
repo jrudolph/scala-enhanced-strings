@@ -64,7 +64,7 @@ object ParserSpecs extends Specification {
   def toks(inner:FormatElement*) = FormatElementList(List(inner:_*))
 
   import org.specs.specification.Example
-  def parseCorrectly(e: =>Example) = { currentSut.verb += " parse correctly"; e }
+  def parseCorrectly = addToSusVerb(" parse correctly")
 }
 
 class ParserSpecsTest extends runner.JUnit4(ParserSpecs)
