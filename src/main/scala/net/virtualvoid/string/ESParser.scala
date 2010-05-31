@@ -67,12 +67,12 @@ object AST{
        res.setAccessible(true)
        Some(res)
      }catch{
-     case _:NoSuchMethodException => None
+     case e:NoSuchMethodException => None
      }
     def realmethod(cl:Class[_]):Method = 
       Array("get"+capitalize(identifier),identifier)
         .flatMap(findMethod(cl,_).toList).firstOption
-        .getOrElse(throw new java.lang.Error("couldn't find method " + identifier + " in class "+cl.getName))
+        .getOrElse(throw new java.lang.Error("couldn't find method " + identifier + " in class "+cl.getName+" methods: "+cl.getMethods.map(_.getName).mkString(", ")))
     var m:Method = null
     def method(cl:Class[_]) = {
       if (m == null){
