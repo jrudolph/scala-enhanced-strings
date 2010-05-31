@@ -7,8 +7,8 @@ import scala.util.parsing.combinator.syntactical._
 import scala.util.parsing.syntax._
 
 object Java{
-  implicit def it2it[T](it:java.lang.Iterable[T]):Iterable[T] = new Iterable[T]{
-    def elements = new Iterator[T]{
+  implicit def it2it[T](it:java.lang.Iterable[T]):Iterable[T] = new Iterable[T] {
+    def iterator = new Iterator[T] {
       val innerIt = it.iterator
       def hasNext = innerIt.hasNext
       def next = innerIt.next
