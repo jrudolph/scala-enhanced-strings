@@ -56,22 +56,6 @@ object EvaluateSpecs extends Specification{
   "The format interpreter" should {
     evaluate(ObjectFormatter)
   }
-  "The format compiler" should {
-    evaluate(FormatCompiler)
-  }
-}
-
-object FormatAccountsExample{
-  def main(args:Array[String]){
-    System.out.println("Hello")
-    System.out.println(FormatCompiler.format(
-"""#name has these bank accounts:
-  #accs[#number at #bank.name having these transactions:
-    #transactions[#isWithdrawal?[Withdrawal|Deposit]: #amount Euros at #date->date[dd.MM.yyyy]]{ 
-    }*]{
-  }*
-""",EvaluateSpecs.thePerson))
-  }
 }
 
 class EvaluateSpecsTest extends runner.JUnit4(EvaluateSpecs)
