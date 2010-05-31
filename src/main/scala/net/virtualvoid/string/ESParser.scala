@@ -63,7 +63,7 @@ object AST{
     import java.lang.NoSuchMethodException
     def findMethod(c:Class[_],name:String):Option[Method] =
      try {
-       val res = c.getMethod(name,null)
+       val res = c.getMethod(name)
        res.setAccessible(true)
        Some(res)
      }catch{
@@ -83,7 +83,7 @@ object AST{
     def returnType(callingCl:Class[_]):Class[_] = method(callingCl).getReturnType
     def genericReturnType(callingCl:Class[_]):java.lang.reflect.Type = method(callingCl).getGenericReturnType
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
-    def eval(o:AnyRef) = method(o.getClass).invoke(o,null)
+    def eval(o:AnyRef) = method(o.getClass).invoke(o)
   }
   case object ThisExp extends Exp(""){
     override def eval(o:AnyRef) = o
