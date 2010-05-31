@@ -131,9 +131,9 @@ object EnhancedStringFormatParser extends RegexParsers{
     idPart ~ opt("." ~> id) ^^ {case str ~ Some(inner) => ParentExp(inner,str)
                                 case str ~ None => Exp(str)}
                    
-  def endOrChars: Parser[String] = literal("}}") ^^ { case _ => "" } | char ^^ { case ch => "" + ch }
+  def endOrChars: Parser[String] = not(literal("}}")) ~ char ^^ { case x ~ ch => "" + ch }
   def scalaExpBody: Parser[ScalaExp] = endOrChars ~ rep(endOrChars) ^^ { case first ~ rest => ScalaExp(first :: rest mkString "") } 
-  def scalaExp: Parser[ScalaExp] = literal("{{") ~!> scalaExpBody
+  def scalaExp: Parser[ScalaExp] = literal("{{") ~!> scalaExpBody <~! literal("}}")
 
   def exp: Parser[Exp] = positioned(expStartChar ~>
     (scalaExp | id | extendParser("{") ~!> id <~! "}"))

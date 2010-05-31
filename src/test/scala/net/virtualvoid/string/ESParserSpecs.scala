@@ -23,6 +23,8 @@ object ParserSpecs extends Specification {
     
     // literal Scala expressions
     "#{{test.it.is}}" in {"#{{test.it.is}}" must beParsedAs(ScalaExp("test.it.is"))}
+    "#{{test.it.is}}*" in {"#{{test.it.is}} *" must beParsedAs(ToStringConversion(ScalaExp("test.it.is")), Literal(" *"))}
+    "#{{List(5,3,2)}}*" in {"#{{List(5,3,2)}}*" must beParsedAs(expand(ScalaExp("List(5,3,2)"), "", ToStringConversion(ThisExp)))}
 
     //escaped square brackets
     "#[abc#]" in {"#[abc#]" must beParsedAs(Literal("[abc]"))}
