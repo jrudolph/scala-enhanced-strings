@@ -49,10 +49,16 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	      case _ => inner match {case AST.Exp(id) => Select(outer,id)}
 	    }
      
+        def parse(code: String): Tree = {
+          val unit = new CompilationUnit(new scala.tools.nsc.util.BatchSourceFile("<snippet>", code))
+          val scanner = new syntaxAnalyzer.UnitParser(unit)
+          scanner.expr()
+        } 
 	    def compileExpression(exp:AST.Exp):Tree = atPos(startOf(exp)) { exp match {
 	      case AST.ThisExp => Ident("it")
 	      case AST.ParentExp(inner,parent) => compileParentExpressionInner(inner,Ident(parent))
-	      case _ => exp match {case AST.Exp(identifier) => Ident(identifier)}
+	      case AST.ScalaExp(exp) => parse(exp)
+	      case _ => exp match { case AST.Exp(identifier) => Ident(identifier) }
 	    }}
 	    def compileElement(el:AST.FormatElement):Tree = el match{
 	      case AST.Literal(str) => Literal(Constant(str))

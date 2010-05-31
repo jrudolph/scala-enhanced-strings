@@ -85,6 +85,9 @@ object AST{
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
     def eval(o:AnyRef) = method(o.getClass).invoke(o)
   }
+  case class ScalaExp(exp: String) extends Exp("") {
+    override def eval(o: AnyRef) = throw new UnsupportedOperationException("not supported in interpreter yet")
+  }
   case object ThisExp extends Exp(""){
     override def eval(o:AnyRef) = o
     override def returnType(callingCl:Class[_]):Class[_] = callingCl
@@ -117,17 +120,23 @@ object EnhancedStringFormatParser extends RegexParsers{
   val expStartChar = '#'
 
   def char = "[^#\\]|\\[]".r | escapedByDoubling("[") | escapedByDoubling("]") | escapedByDoubling("#") | escapedByDoubling("|")
+  def chars: Parser[String] = char ~ rep(char) ^^ {case first ~ rest => first :: rest reduceLeft (_+_)}
+  
   def idChar = "\\w".r
-  def lit:Parser[FormatElement] = char ~ rep(char) ^^ {case first ~ rest => Literal(first :: rest reduceLeft (_+_))}
+  def lit:Parser[FormatElement] = chars ^^ {case str => Literal(str)}
 
   def idPart:Parser[String] = idChar ~ rep(idChar) ^^ {case first ~ rest => first :: rest mkString ""}
   def id:Parser[Exp] =
     "this" 					^^ {str => ThisExp} |
     idPart ~ opt("." ~> id) ^^ {case str ~ Some(inner) => ParentExp(inner,str)
                                 case str ~ None => Exp(str)}
+                   
+  def endOrChars: Parser[String] = literal("}}") ^^ { case _ => "" } | char ^^ { case ch => "" + ch }
+  def scalaExpBody: Parser[ScalaExp] = endOrChars ~ rep(endOrChars) ^^ { case first ~ rest => ScalaExp(first :: rest mkString "") } 
+  def scalaExp: Parser[ScalaExp] = literal("{{") ~!> scalaExpBody
 
   def exp: Parser[Exp] = positioned(expStartChar ~>
-    (id | extendParser("{") ~!> id <~! "}"))
+    (scalaExp | id | extendParser("{") ~!> id <~! "}"))
   
   def expAsString:Parser[FormatElement] = exp ^^ {case exp => ToStringConversion(exp)}
 

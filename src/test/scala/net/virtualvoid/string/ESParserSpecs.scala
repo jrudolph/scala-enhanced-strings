@@ -20,6 +20,9 @@ object ParserSpecs extends Specification {
     "#this" in {"#this" must beParsedAs(ThisExp)}
     "#{this}" in {"#{this}" must beParsedAs(ThisExp)}
     "#this[]*" in {"#this[]*" must beParsedAs(expand(ThisExp,""))}
+    
+    // literal Scala expressions
+    "#{{test.it.is}}" in {"#{{test.it.is}}" must beParsedAs(ScalaExp("test.it.is"))}
 
     //escaped square brackets
     "#[abc#]" in {"#[abc#]" must beParsedAs(Literal("[abc]"))}
