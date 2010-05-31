@@ -51,7 +51,8 @@ object AST{
     def format(o:AnyRef) = exp.eval(o) match{
       // array or collection or similar
     case l : java.lang.Iterable[AnyRef] => realEval(l)
-    case l : Seq[AnyRef] => realEval(l)
+    case l : Iterable[AnyRef] => realEval(l)
+    case a: Array[AnyRef] => realEval(a)
     }
   }
   
