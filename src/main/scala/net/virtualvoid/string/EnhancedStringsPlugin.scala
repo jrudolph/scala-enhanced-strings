@@ -79,6 +79,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	          //localTyper.typed(atPos(tree.pos){compile(EnhancedStringFormatParser.parse(str))})
 	        } catch {
 	          case p:ParseException => error(p.getMessage);tree
+	          case e:TypeError => error(e.getMessage);tree
 	        }
 	      case _ => tree
 	    }
