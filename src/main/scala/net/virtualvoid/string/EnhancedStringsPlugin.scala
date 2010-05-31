@@ -80,7 +80,16 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	    	els.elements.size match {
 	    	  case 0 => Literal(Constant(""))
 	    	  case 1 => compileElement(els.elements(0))
-	    	  case _ => els.elements.map(compileElement _).reduceLeft((a,b)=>Apply(Select(a,"$plus"),List(b)))
+	    	  case _ =>
+	    	    // the general case:
+	    	    // compile into new StringBuilder().append(a).append(b).[...].append(z).toString
+	    	    val appender = els.elements.map(compileElement _)
+	    	                      .foldLeft(
+	    	                        Apply(Select(New(Ident("StringBuilder".toTypeName)), nme.CONSTRUCTOR), Nil)) { 
+	    	                        (a, b) =>
+	    	                          Apply(Select(a, "append"), List(b)) 
+	    	                        }
+	    	    Apply(Select(appender, "toString"), Nil)
 	    	}
         }
         
