@@ -97,10 +97,8 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	     *  visited after its children.
 	     */
 	    def postTransform(tree: Tree): Tree = tree match {
-	      case This(qual) => {System.out.println(tree+":"+qual+qual.getClass+":"+qual.toString.length);tree}
 	      case Literal(Constant(str:String)) => 
-    	      
-	        try {
+	        try {println(version)
 	          atPos(tree.pos)(compiled(EnhancedStringFormatParser.parse(str), tree.pos))
 	        } catch {
 	          case p:ParseException => p.printStackTrace;unit.error(tree.pos, p.getMessage);tree
@@ -108,9 +106,39 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	        }
 	      case _ => tree
 	    }
+
+        val ESType = "EnhancedString".toTypeName
+        val SyntaxParam = "syntax".toTermName
+	    val versionExtractor: PartialFunction[Tree, String] = { case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), List(AssignOrNamedArg(Ident(SyntaxParam), Literal(Constant(version: String))))) => version}
+	    
+	    def extractVersion(m: Modifiers): (Modifiers, Option[String]) = m match {
+	      case Modifiers(a, b, anns, d) =>
+	        val (version, rest) = anns.partition(versionExtractor.isDefinedAt _)
+	        
+	        (Modifiers(a, b, rest, d), version.headOption.map(versionExtractor))
+	      case _ => (m, None)
+	    }
+	    
+	    var version: Option[String] = None
 	
-	    override def transform(tree: Tree): Tree = {
-	      postTransform(super.transform(preTransform(tree)))
+	    override def transform(tree: Tree): Tree = tree match {
+	      case d@DefDef(mods, _, _, _, _, _) =>
+	        val (newMods, newVersion) = extractVersion(mods)
+	        
+	        newVersion match {
+	          case Some(v) => 
+	            val old = version
+	            version = Some(v)
+	            println("Version now "+v)
+	            val res = super.transform(tree)
+	            version = old
+	            res.asInstanceOf[DefDef].copy(mods = newMods)
+	          case None => 
+	            super.transform(tree)
+	        }
+	      case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), List(x)) => println(x.getClass);super.transform(tree)
+	      case _ if version.isDefined => postTransform(super.transform(tree))
+	      case _ => super.transform(tree)
 	    }
     }
   }
