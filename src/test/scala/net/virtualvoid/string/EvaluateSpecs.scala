@@ -61,5 +61,3 @@ object EvaluateSpecs extends Specification{
     evaluate(ObjectFormatter)
   }
 }
-
-class EvaluateSpecsTest extends runner.JUnit4(EvaluateSpecs)

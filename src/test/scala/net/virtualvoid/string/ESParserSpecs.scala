@@ -79,4 +79,3 @@ object ParserSpecs extends Specification {
   def parseCorrectly = addToSusVerb(" parse correctly")
 }
 
-class ParserSpecsTest extends runner.JUnit4(ParserSpecs)
