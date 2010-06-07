@@ -61,8 +61,8 @@ object EnhancedStringFormatParser extends RegexParsers with ESParser {
   def idPart:Parser[String] = idChar ~ rep(idChar) ^^ {case first ~ rest => first :: rest mkString ""}
   def id:Parser[Exp] =
     "this" 					^^ {str => ThisExp} |
-    idPart ~ opt("." ~> id) ^^ {case str ~ Some(inner) => ParentExp(inner,str)
-                                case str ~ None => Exp(str)}
+    idPart ~ opt("." ~> id) ^^ {case str ~ Some(inner) => ParentExp(inner, str)
+                                case str ~ None => Ident(str)}
                    
   def endOrChars: Parser[String] = not(literal("}}")) ~ char ^^ { case x ~ ch => "" + ch }
   def scalaExpBody: Parser[ScalaExp] = endOrChars ~ rep(endOrChars) ^^ { case first ~ rest => ScalaExp(first :: rest mkString "") } 

@@ -34,7 +34,7 @@ object AST{
     def chars = ""
   }
   case class Expand(exp:Exp,sep:String,inner:FormatElementList) extends FormatElement{
-    def chars = exp.chars + ":" + sep
+    //def chars = exp.chars + ":" + sep
     def realEval(l:Iterable[AnyRef]):String = l.map(inner.format(_)) mkString sep
     import Java.it2it
     def format(o:AnyRef) = exp.eval(o) match{
@@ -45,7 +45,10 @@ object AST{
     }
   }
   
-  case class Exp(identifier:String) extends Positional {
+  trait Exp extends Positional {
+    def eval(o: AnyRef): AnyRef
+  }
+  case class Ident(identifier:String) extends Exp {
     def chars = identifier
 
     import java.lang.reflect.{Method}
@@ -74,22 +77,21 @@ object AST{
     def capitalize(s:String):String = s.substring(0,1).toUpperCase + s.substring(1)
     def eval(o:AnyRef) = method(o.getClass).invoke(o)
   }
-  case class ScalaExp(exp: String) extends Exp("") {
+  case class ScalaExp(exp: String) extends Exp {
     override def eval(o: AnyRef) = throw new UnsupportedOperationException("not supported in interpreter yet")
   }
-  case object ThisExp extends Exp(""){
+  case object ThisExp extends Exp {
     override def eval(o:AnyRef) = o
-    override def returnType(callingCl:Class[_]):Class[_] = callingCl
-    override def genericReturnType(callingCl:Class[_]):java.lang.reflect.Type =
+    def returnType(callingCl:Class[_]):Class[_] = callingCl
+    def genericReturnType(callingCl:Class[_]):java.lang.reflect.Type =
       throw new java.lang.Error("No generic type information available for "+callingCl.getName+
                                   " since it is erased. #this can't be used in conditional or expand expressions")
   }
-  case class ParentExp(inner:Exp,parent:String) extends Exp(parent){
-    override def eval(o:AnyRef) = inner.eval(super.eval(o))
+  case class ParentExp(inner:Exp, parent: String) extends Exp {
+    override def eval(o:AnyRef) = inner.eval(Ident(parent).eval(o))
   }
   
   case class FormatElementList(elements:Seq[FormatElement]){
-    def chars = ""
     def format(o:AnyRef):String = elements.map(_.format(o)) mkString "" 
   }
 }

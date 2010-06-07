@@ -45,7 +45,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
         def compileParentExpressionInner(inner: AST.Exp, outer: Tree): Tree = inner match {
           case AST.ParentExp(inner, parent) => compileParentExpressionInner(inner, Select(outer, parent))
-          case _ => inner match { case AST.Exp(id) => Select(outer, id) }
+          case AST.Ident(id) => Select(outer, id)
         }
 
         def parse(code: String): Tree = {
@@ -58,7 +58,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             case AST.ThisExp => Ident("it")
             case AST.ParentExp(inner, parent) => compileParentExpressionInner(inner, Ident(parent))
             case AST.ScalaExp(exp) => parse(exp)
-            case _ => exp match { case AST.Exp(identifier) => Ident(identifier) }
+            case AST.Ident(identifier) => Ident(identifier)
           }
         }
         def compileElement(el: AST.FormatElement): Tree = el match {
