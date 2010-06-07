@@ -5,4 +5,5 @@ class EnhancedStrings(info: ProjectInfo) extends DefaultProject(info) with AutoC
   val specs = "org.scala-tools.testing" %% "specs" % "1.6.5-SNAPSHOT" % "test"
   
   override def compileOptions = super.compileOptions ++ Seq(Unchecked)
+  override def packageAction = super.packageAction dependsOn(compile, test)
 }
