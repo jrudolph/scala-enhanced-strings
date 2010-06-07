@@ -1,3 +1,7 @@
+/* SeS - Scala Enhanced Strings
+* Copyright 2008 - 2010 Johannes Rudolph
+*/
+
 package net.virtualvoid.string
 
 import _root_.org.specs._
