@@ -53,7 +53,7 @@ object TypeHelper {
       case cl:Class[_] => 
         (supertype(cl).toList ++ cl.getGenericInterfaces)
           .flatMap(t => genericInstanceType(t,Candidate,tp).toList)
-          .firstOption
+          .headOption
     }
   }
   def main(args:scala.Array[String]):Unit = {

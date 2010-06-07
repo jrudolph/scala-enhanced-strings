@@ -22,7 +22,7 @@ object AST{
     def format(o:AnyRef) = condition.eval(o) match {
       case java.lang.Boolean.TRUE => thenToks.format(o)
       case java.lang.Boolean.FALSE => elseToks.format(o)
-      case x:Option[AnyRef] => x.map(thenToks.format).getOrElse(elseToks.format(o))
+      case x: Option[_] => x.asInstanceOf[Option[AnyRef]].map(thenToks.format).getOrElse(elseToks.format(o))
     }
   }
   case class DateConversion(exp:Exp,format:String) extends FormatElement{
@@ -39,8 +39,8 @@ object AST{
     import Java.it2it
     def format(o:AnyRef) = exp.eval(o) match{
       // array or collection or similar
-    case l : java.lang.Iterable[AnyRef] => realEval(l)
-    case l : Iterable[AnyRef] => realEval(l)
+    case l: java.lang.Iterable[_] => realEval(l.asInstanceOf[java.lang.Iterable[AnyRef]])
+    case l: Iterable[_] => realEval(l.asInstanceOf[Iterable[AnyRef]])
     case a: Array[AnyRef] => realEval(a)
     }
   }
@@ -63,7 +63,7 @@ object AST{
      }
     def realmethod(cl:Class[_]):Method = 
       Array("get"+capitalize(identifier),identifier)
-        .flatMap(findMethod(cl,_).toList).firstOption
+        .flatMap(findMethod(cl,_).toList).headOption
         .getOrElse(throw new java.lang.Error("couldn't find method " + identifier + " in class "+cl.getName+" methods: "+cl.getMethods.map(_.getName).mkString(", ")))
     var m:Method = null
     def method(cl:Class[_]) = {
