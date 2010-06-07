@@ -107,7 +107,25 @@ object AST{
 
 class ParseException(msg:String) extends Exception(msg)
 
-object EnhancedStringFormatParser extends RegexParsers{
+// syntax flavor name and version
+case class VersionInfo(flavor: String, version: Int)
+
+trait ESParser {
+  def parse(input:String): AST.FormatElementList
+  def Version: VersionInfo
+}
+
+object ParserFactory {
+  val defaultVersion: VersionInfo = VersionInfo("poros", 1)
+  def parser(info: VersionInfo = defaultVersion): Option[ESParser] = info match {
+    case EnhancedStringFormatParser.Version => Some(EnhancedStringFormatParser)
+    case _ => None
+  }
+}
+
+object EnhancedStringFormatParser extends RegexParsers with ESParser {
+  val Version = VersionInfo("poros", 1)
+
   import AST._
   
   override type Elem = Char

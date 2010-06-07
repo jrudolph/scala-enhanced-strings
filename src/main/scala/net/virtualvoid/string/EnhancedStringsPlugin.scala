@@ -30,6 +30,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
     class ESTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
       localTyper = analyzer.newTyper(analyzer.rootContext(unit, EmptyTree, false))
+      import unit.error
 
       val it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
 
@@ -95,8 +96,8 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       def postTransform(tree: Tree): Tree = tree match {
         case Literal(Constant(str: String)) =>
           try {
-            println(version)
-            atPos(tree.pos)(compiled(EnhancedStringFormatParser.parse(str), tree.pos))
+            println(parser.get.Version)
+            atPos(tree.pos)(compiled(parser.get.parse(str), tree.pos))
           } catch {
             case p: ParseException => p.printStackTrace; unit.error(tree.pos, p.getMessage); tree
             case e: TypeError => localTyper.reportTypeError(tree.pos, e); tree
@@ -106,17 +107,29 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
       val ESType = "EnhancedString".toTypeName
       val SyntaxParam = "syntax".toTermName
-      val versionExtractor: PartialFunction[Tree, String] = { case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), List(AssignOrNamedArg(Ident(SyntaxParam), Literal(Constant(version: String))))) => version }
+      val VersionParam = "version".toTermName
+      
+      val annotationMatcher: PartialFunction[Tree, List[Tree]] = { case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), args) => args }
+      
+      def versionExtractor(cur: VersionInfo, arg: Tree): VersionInfo = arg match {
+        case AssignOrNamedArg(Ident(SyntaxParam), Literal(Constant(flavor: String))) => cur.copy(flavor = flavor)
+        case AssignOrNamedArg(Ident(SyntaxParam), c@Literal(Constant(flavor))) => error(c.pos, "The "+SyntaxParam+" attribute of "+ESType+" must be a String value"); cur
 
-      def extractVersion(m: Modifiers): (Modifiers, Option[String]) = m match {
+        case AssignOrNamedArg(Ident(VersionParam), Literal(Constant(version: Int))) => cur.copy(version = version)
+        case AssignOrNamedArg(Ident(VersionParam), c@Literal(Constant(version))) => error(c.pos, "The "+VersionParam+" attribute of "+ESType+" must be an integer value"); cur
+        
+        case _ => error(arg.pos, "Unknown parameter of "+ESType+": "+arg); cur
+      }
+
+      def extractVersion(m: Modifiers): (Modifiers, Option[VersionInfo]) = m match {
         case Modifiers(a, b, anns, d) =>
-          val (version, rest) = anns.partition(versionExtractor.isDefinedAt _)
+          val (args, rest) = anns.partition(annotationMatcher.isDefinedAt _)
 
-          (Modifiers(a, b, rest, d), version.headOption.map(versionExtractor))
+          (Modifiers(a, b, rest, d), args.headOption.map(annotationMatcher).map(args => args.foldLeft(ParserFactory.defaultVersion)(versionExtractor)))
         case _ => (m, None)
       }
 
-      var version: Option[String] = None
+      var parser: Option[ESParser] = None
 
       override def transform(tree: Tree): Tree = tree match {
         case d@DefDef(mods, _, _, _, _, _) =>
@@ -124,17 +137,22 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
           newVersion match {
             case Some(v) =>
-              val old = version
-              version = Some(v)
+              val oldParser = parser
+              
+              parser = ParserFactory.parser(v)
+              if (!parser.isDefined)
+                error(d.pos, "EnhancedString syntax with version "+v+" not found.")
+              
               println("Version now " + v)
               val res = super.transform(tree)
-              version = old
+              
+              parser = oldParser
               res.asInstanceOf[DefDef].copy(mods = newMods)
             case None =>
               super.transform(tree)
           }
         case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), List(x)) => println(x.getClass); super.transform(tree)
-        case _ if version.isDefined => postTransform(super.transform(tree))
+        case _ if parser.isDefined => postTransform(super.transform(tree))
         case _ => super.transform(tree)
       }
     }
