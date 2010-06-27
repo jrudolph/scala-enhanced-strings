@@ -56,20 +56,20 @@ object EnhancedStringFormatParser extends RegexParsers with ESParser {
   def chars: Parser[String] = char ~ rep(char) ^^ {case first ~ rest => first :: rest reduceLeft (_+_)}
   
   def idChar = "\\w".r
-  def lit:Parser[FormatElement] = chars ^^ {case str => Literal(str)}
+  def lit:Parser[Literal] = positioned(chars ^^ {case str => Literal(str)})
 
   def idPart:Parser[String] = idChar ~ rep(idChar) ^^ {case first ~ rest => first :: rest mkString ""}
-  def id:Parser[Exp] =
+  def id:Parser[Exp] = positioned(
     "this" 					^^ {str => ThisExp} |
     idPart ~ opt("." ~> id) ^^ {case str ~ Some(inner) => ParentExp(inner, str)
-                                case str ~ None => Ident(str)}
+                                case str ~ None => Ident(str)})
                    
   def endOrChars: Parser[String] = not(literal("}}")) ~ char ^^ { case x ~ ch => "" + ch }
   def scalaExpBody: Parser[ScalaExp] = endOrChars ~ rep(endOrChars) ^^ { case first ~ rest => ScalaExp(first :: rest mkString "") } 
-  def scalaExp: Parser[ScalaExp] = literal("{{") ~!> scalaExpBody <~! literal("}}")
+  def scalaExp: Parser[ScalaExp] = literal("{{") ~!> positioned(scalaExpBody) <~! literal("}}")
 
-  def exp: Parser[Exp] = positioned(expStartChar ~>
-    (scalaExp | id | extendParser("{") ~!> id <~! "}"))
+  def exp: Parser[Exp] = expStartChar ~>
+    (scalaExp | id | extendParser("{") ~!> id <~! "}")
   
   def expAsString:Parser[FormatElement] = exp ^^ {case exp => ToStringConversion(exp)}
 
