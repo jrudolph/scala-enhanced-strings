@@ -36,7 +36,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       localTyper = analyzer.newTyper(analyzer.rootContext(unit, EmptyTree, false))
       import unit.error
 
-      val it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
+      def it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
 
       def compiled(els: AST.FormatElementList, pos: Position): Tree = {
 
