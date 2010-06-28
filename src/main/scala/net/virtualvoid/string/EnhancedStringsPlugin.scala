@@ -48,16 +48,28 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
           case AST.Ident(id) => Select(outer, id)
         }
 
-        def parse(code: String): Tree = {
-          val unit = new CompilationUnit(new scala.tools.nsc.util.BatchSourceFile("<snippet>", code))
-          val scanner = new syntaxAnalyzer.UnitParser(unit)
+        def fixPos(pos: Position, tree: Tree) = {
+          object PositionTreeTraverser extends Traverser {
+            override def traverse(t: Tree) {
+              t.pos = pos.withPoint(pos.startOrPoint + t.pos.point)
+              super.traverse(t)
+            }
+          }
+          
+          PositionTreeTraverser.traverse(tree)
+          tree
+        }
+        def parse(code: String, pos: Position): Tree = {
+          import nsc.util._
+          val un = new CompilationUnit(new ScriptSourceFile(unit.source.asInstanceOf[BatchSourceFile], code.toCharArray, pos.startOrPoint))
+          val scanner = new syntaxAnalyzer.UnitParser(un)
           scanner.expr()
         }
         def compileExpression(exp: AST.Exp): Tree = atPos(startOf(exp)) {
           exp match {
             case AST.ThisExp => Ident("it")
             case AST.ParentExp(inner, parent) => compileParentExpressionInner(inner, Ident(parent))
-            case AST.ScalaExp(exp) => parse(exp)
+            case AST.ScalaExp(scalaExp) => fixPos(startOf(exp), parse(scalaExp, startOf(exp)))
             case AST.Ident(identifier) => Ident(identifier)
           }
         }
