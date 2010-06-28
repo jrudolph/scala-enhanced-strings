@@ -41,11 +41,17 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       def it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
 
       def compiled(els: AST.FormatElementList, pos: Position): Tree = {
-
-        def startOf(e: AST.Exp): Position = e.pos match {
+	import scala.util.parsing.input.Positional
+        def startOf(e: Positional): Position = e.pos match {
 	  // in case, we don't have a real position, this is only an approximation
 	  case scala.util.parsing.input.NoPosition => pos.makeTransparent
 	  case _ => pos.withPoint(pos.startOrPoint + e.pos.column)
+	}
+	def positionOf(e: Positional, length: Int) = e.pos match {
+	  case scala.util.parsing.input.NoPosition => pos.makeTransparent	
+	  case _ => 
+	    val start = pos.startOrPoint + e.pos.column
+	    new scala.tools.nsc.util.RangePosition(pos.source, start, start, start + length)
 	}
         def compile(els: AST.FormatElementList): Tree = compiled(els, pos)
 
@@ -54,10 +60,16 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
           case AST.Ident(id) => Select(outer, id)
         }
 
+	def offsetPositionBy(pos: Position, offset: Int) = pos match {
+	  case p: scala.tools.nsc.util.RangePosition =>
+	    new scala.tools.nsc.util.RangePosition(unit.source, p.start+offset, p.start+offset, p.end+offset)
+	  case _ => pos.withPoint(pos.startOrPoint + offset)
+	}
+
         def fixPos(pos: Position, tree: Tree) = {
           object PositionTreeTraverser extends Traverser {
             override def traverse(t: Tree) {
-              t.pos = pos.withPoint(pos.startOrPoint + t.pos.point)
+              t.pos = offsetPositionBy(t.pos, pos.point)
               super.traverse(t)
             }
           }
@@ -76,11 +88,11 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             case AST.ThisExp => Ident("it")
             case AST.ParentExp(inner, parent) => compileParentExpressionInner(inner, Ident(parent))
             case AST.ScalaExp(scalaExp) => fixPos(startOf(exp), parse(scalaExp, startOf(exp)))
-            case AST.Ident(identifier) => Ident(identifier)
+            case AST.Ident(identifier) => atPos(positionOf(exp, identifier.length))(Ident(identifier))
           }
         }
-        def compileElement(el: AST.FormatElement): Tree = el match {
-          case AST.Literal(str) => Literal(Constant(str))
+        def compileElement(el: AST.FormatElement): Tree = atPos(startOf(el)){ el match {
+          case AST.Literal(str) => atPos(positionOf(el, str.length)) (Literal(Constant(str)))
           case AST.ToStringConversion(exp) => Select(compileExpression(exp), "toString")
           case AST.Expand(exp, sep, inner) => Apply(
             Select(
@@ -94,7 +106,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
               CaseDef(Bind("it", Literal(Constant(true))), compile(thenEls)),
               CaseDef(Literal(Constant(false)), compile(elseEls))
               ))
-        }
+        }}
 
         els.elements.size match {
           case 0 => Literal(Constant(""))
@@ -112,6 +124,18 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
         }
       }
 
+      /** Strip off the delimiters of a string constant's position */
+      def fixPosition(pos: Position, len: Int): Position = pos match {
+	case p: scala.tools.nsc.util.RangePosition => 
+	  val start = p.start
+	  val end = p.end
+	  val lengthWithDelims = end - start
+	  val delims = (lengthWithDelims - len) / 2 - 1
+	  println("Found delims of total length "+(lengthWithDelims - len))
+	  new scala.tools.nsc.util.RangePosition(p.source, start+delims, start+delims, end-delims)
+	case _ => pos
+      }
+
       /** When using <code>postTransform</code>, each node is
        *  visited after its children.
        */
@@ -119,7 +143,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
         case Literal(Constant(str: String)) =>
           try {
             println(parser.get.Version)
-            atPos(tree.pos.makeTransparent)(compiled(parser.get.parse(str), tree.pos))
+            atPos(tree.pos.makeTransparent)(compiled(parser.get.parse(str), fixPosition(tree.pos, str.length)))
           } catch {
             case p: ParseException => p.printStackTrace; unit.error(tree.pos, p.getMessage); tree
             case e: TypeError => localTyper.reportTypeError(tree.pos, e); tree
