@@ -127,7 +127,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
         case _ => tree
       }
 
-      val ESType = "EnhancedString".toTypeName
+      val ESType = "EnhanceStrings".toTypeName
       val SyntaxParam = "syntax".toTermName
       val VersionParam = "version".toTermName
       
