@@ -40,7 +40,11 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
       def compiled(els: AST.FormatElementList, pos: Position): Tree = {
 
-        def startOf(e: AST.Exp): Position = pos.withPoint(pos.startOrPoint + e.pos.column)
+        def startOf(e: AST.Exp): Position = e.pos match {
+	  // in case, we don't have a real position, this is only an approximation
+	  case scala.util.parsing.input.NoPosition => pos.makeTransparent
+	  case _ => pos.withPoint(pos.startOrPoint + e.pos.column)
+	}
         def compile(els: AST.FormatElementList): Tree = compiled(els, pos)
 
         def compileParentExpressionInner(inner: AST.Exp, outer: Tree): Tree = inner match {
@@ -113,7 +117,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
         case Literal(Constant(str: String)) =>
           try {
             println(parser.get.Version)
-            atPos(tree.pos)(compiled(parser.get.parse(str), tree.pos))
+            atPos(tree.pos.makeTransparent)(compiled(parser.get.parse(str), tree.pos))
           } catch {
             case p: ParseException => p.printStackTrace; unit.error(tree.pos, p.getMessage); tree
             case e: TypeError => localTyper.reportTypeError(tree.pos, e); tree
@@ -163,7 +167,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
               val res = super.transform(tree)
               
               parser = oldParser
-              res.asInstanceOf[DefDef].copy(mods = newMods)
+              atPos(d.pos)(res.asInstanceOf[DefDef].copy(mods = newMods))
             case None =>
               super.transform(tree)
           }
