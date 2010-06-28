@@ -12,6 +12,8 @@ import nsc.plugins.PluginComponent
 import nsc.transform.{ Transform, TypingTransformers }
 import nsc.symtab.Flags
 
+final class OriginalString(final val string: String) extends StaticAnnotation {}
+
 class EnhancedStringsPlugin(val global: Global) extends Plugin {
   import global._
 
@@ -151,9 +153,15 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
       var parser: Option[ESParser] = None
 
+      def withMods(tree: Tree, newMods: Modifiers): Tree = tree match {
+	case d: DefDef    => d.copy(mods = newMods)
+	case m: ModuleDef => m.copy(mods = newMods)
+	case c: ClassDef  => c.copy(mods = newMods)
+	case _            => tree
+      }
       override def transform(tree: Tree): Tree = tree match {
-        case d@DefDef(mods, _, _, _, _, _) =>
-          val (newMods, newVersion) = extractVersion(mods)
+        case m: MemberDef =>
+          val (newMods, newVersion) = extractVersion(m.mods)
 
           newVersion match {
             case Some(v) =>
@@ -161,13 +169,13 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
               
               parser = ParserFactory.parser(v)
               if (!parser.isDefined)
-                error(d.pos, "EnhancedString syntax with version "+v+" not found.")
+                error(tree.pos, "EnhancedString syntax with version "+v+" not found.")
               
               println("Version now " + v)
               val res = super.transform(tree)
               
               parser = oldParser
-              atPos(d.pos)(res.asInstanceOf[DefDef].copy(mods = newMods))
+              atPos(tree.pos)(withMods(res, newMods))
             case None =>
               super.transform(tree)
           }

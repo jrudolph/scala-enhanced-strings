@@ -1,6 +1,6 @@
+@EnhancedString(syntax="poros")
 object Test {
-  @EnhancedString(syntax="poros")
   def main(args: Array[String]) {
-    println("These are the arguments: #args{, }*")
+    println("These are the arguments: #args{, }* {{ args(5) }}")
   }
 }
