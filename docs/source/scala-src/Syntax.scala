@@ -1,7 +1,7 @@
 package net.virtualvoid.strings
 
-object Syntax {
-   self: ScalaEnhancedStrings => 
+object Syntax extends ScalaEnhancedStrings {
+
 }
 /*
 Syntax
