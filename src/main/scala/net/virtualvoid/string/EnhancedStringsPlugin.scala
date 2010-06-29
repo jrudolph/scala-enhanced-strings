@@ -63,7 +63,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	def offsetPositionBy(pos: Position, offset: Int) = pos match {
 	  case p: scala.tools.nsc.util.RangePosition =>
 	    new scala.tools.nsc.util.RangePosition(unit.source, p.start+offset, p.start+offset, p.end+offset)
-	  case _ => pos.withPoint(pos.startOrPoint + offset)
+	  case _ => pos.withSource(unit.source, offset)
 	}
 
         def fixPos(pos: Position, tree: Tree) = {
