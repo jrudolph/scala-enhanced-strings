@@ -1,5 +1,5 @@
 package net.virtualvoid.strings
 
-object KnownIssues extends ScalaEnhancedStrings{
+object Stuff extends ScalaEnhancedStrings {
   
 }

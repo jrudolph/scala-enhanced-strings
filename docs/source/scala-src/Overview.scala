@@ -11,6 +11,6 @@ class ScalaEnhancedStrings {
     Installation,
     Usage,
     Syntax,
-    KnownIssues
+    Stuff
   )
 }

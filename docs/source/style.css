@@ -17,7 +17,7 @@ pre, code {
 .double { color: blue; }
 .float { color: blue; }
 .long { color: #008080; }
-.int { color: #210CCF; font-weight: bold; }
+.int { color: #4200DF; }
 .comment { 
 	color: #BFD0FF;
 	font-size: 14pt;
@@ -29,6 +29,7 @@ pre, code {
     color: #777777;
 }
 
+a { color: #aa0000; }
 a:link {
     color: #DF0000;
 }
