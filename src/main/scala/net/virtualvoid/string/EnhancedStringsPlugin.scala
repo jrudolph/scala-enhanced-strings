@@ -56,8 +56,8 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
         def compile(els: AST.FormatElementList): Tree = compiled(els, pos)
 
         def compileParentExpressionInner(inner: AST.Exp, outer: Tree): Tree = inner match {
-          case AST.ParentExp(inner, parent) => compileParentExpressionInner(inner, Select(outer, parent))
-          case AST.Ident(id) => Select(outer, id)
+          case AST.ParentExp(inner, parent) => atPos(positionOf(inner, parent.length))(compileParentExpressionInner(inner, Select(outer, parent)))
+          case AST.Ident(id) => atPos(positionOf(inner, id.length))(Select(outer, id))
         }
 
 	def offsetPositionBy(pos: Position, offset: Int) = pos match {
@@ -85,8 +85,8 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
         }
         def compileExpression(exp: AST.Exp): Tree = atPos(startOf(exp)) {
           exp match {
-            case AST.ThisExp => Ident("it")
-            case AST.ParentExp(inner, parent) => compileParentExpressionInner(inner, Ident(parent))
+            case AST.ThisExp => atPos(positionOf(exp, 4))(Ident("it"))
+            case AST.ParentExp(inner, parent) => compileParentExpressionInner(inner, atPos(positionOf(exp, parent.length))(Ident(parent)))
             case AST.ScalaExp(scalaExp) => fixPos(startOf(exp), parse(scalaExp, startOf(exp)))
             case AST.Ident(identifier) => atPos(positionOf(exp, identifier.length))(Ident(identifier))
           }
