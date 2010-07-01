@@ -48,9 +48,17 @@ object Usage extends ScalaEnhancedStrings {
 
   @EnhanceStrings(syntax= "poros", version = 1) // poros is the default syntax flavor
   trait Example2 {
-    val x = "The class of my parent object is: #Usage"
+    val x = "The class of my parent object is: #Usage.getClass"
   }
 
   /* Next chapter: */ Syntax
 }
+
+/* SeS - Scala Enhanced Strings
+ * Copyright 2008 - 2010 Johannes Rudolph
+ * Visit http://github.com/jrudolph/scala-enhanced-strings
+ * File bugs at http://github.com/jrudolph/scala-enhanced-strings/issues
+ * Mailing list at http://groups.google.com/group/scala-enhanced-strings
+ */
+
 
