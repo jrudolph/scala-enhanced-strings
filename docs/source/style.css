@@ -26,15 +26,15 @@ pre, code {
 	line-height: normal;
 }
 .delimiter {
-    color: #7777770;
+    color: #777777;
 }
 
 a:link {
-    color: red;
+    color: #DF0000;
 }
 
 a:visited {
-    color: red;
+    color: #DF0000;
 }
 
 /* to highlight a reference or definition */

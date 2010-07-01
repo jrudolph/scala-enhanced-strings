@@ -13,19 +13,21 @@ trait StandaloneUsage {
 }
 
 trait UseWithSBT {
-  import sbt._
-
-  /* See the usage example at http://github.com/jrudolph/scala-enhanced-strings/tree/master/usage or here: */
+  /* See the usage example at http://github.com/jrudolph/scala-enhanced-strings/tree/master/usage
+     or here: */
   
   /* Starting with a normal project descriptor... */
-  /*class ESUsageExample(info: ProjectInfo) 
+  import sbt._
+
+  class ESUsageExample(info: ProjectInfo) 
     extends DefaultProject(info) 
-     ... extend your project descriptor 
+    /* ... extend your project descriptor */
     with AutoCompilerPlugins {
-    // TODO: add repository, better version
-    // declare a dependency on net.virtualvoid.scala-enhanced-strings
-    val es = compilerPlugin("net.virtualvoid" %% "scala-enhanced-strings" % "1.0")
-  }*/
+  
+    val virtualVoid = "Virtual-Void repository" at "http://mvn.virtual-void.net"
+
+    val es = compilerPlugin("net.virtualvoid" %% "scala-enhanced-strings" % "0.5")
+  }
 }
 
 object Usage extends ScalaEnhancedStrings {
