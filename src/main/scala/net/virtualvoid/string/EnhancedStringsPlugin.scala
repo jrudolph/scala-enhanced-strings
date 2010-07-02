@@ -21,7 +21,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
   val description = "allows variable interpolation in strings"
   val components = List[PluginComponent](Component)
 
-  private object Component extends PluginComponent with Transform with TypingTransformers {
+  private object Component extends PluginComponent with Transform with TypingTransformers with MyNodePrinter{
     import global._
     import global.definitions._
 
@@ -99,15 +99,29 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             case AST.Ident(identifier) => atPos(positionOf(exp, identifier.length))(Ident(identifier))
           }
         }
-        def compileElement(el: AST.FormatElement): Tree = atPos(startOf(el)){ el match {
-          case AST.Literal(str) => atPos(positionOf(el, str.length)) (Literal(Constant(str)))
-          case AST.ToStringConversion(exp) => Select(compileExpression(exp), "toString")
-          case AST.Expand(exp, sep, inner) => Apply(
+/*Apply(
             Select(
             Apply(Select(compileExpression(exp), "map")
             , List(Function(List(it), compile(inner)))), "mkString")
-            , List(Literal(Constant(sep))))
+            , List(Literal(Constant(sep))))*/
+
+        def compileElement(el: AST.FormatElement): Tree = atPos(startOf(el)){ el match {
+          case AST.Literal(str) => atPos(positionOf(el, str.length)) (Literal(Constant(str)))
+          case AST.ToStringConversion(exp) => Select(compileExpression(exp), "toString")
+          case AST.Expand(exp, sep, inner) => 
+	    val sepChar = Literal(Constant(sep))
+	    @EnhanceStrings def here = "(~compileExpression(exp)).map(it => (~compile(inner))).mkString(~sepChar)"
+	    //Apply(Select(Apply(Select(compileExpression(exp), "map"), List(Function(List(ValDef(Modifiers(0), "it", TypeTree(), EmptyTree)), compile(inner)))), "mkString"), List(sepChar))
+	    here
           case AST.Conditional(cond, thenEls, elseEls) =>
+	    /*@EnhanceStrings def here = """((~compileExpression(cond)): Any) match {
+	      case Some(it) => ~compile(thenEls)
+	      case None => ~compile(elseEls)
+	      case it@true => ~compile(thenElse)
+	      case false => ~compile(elseEls)
+	    }"""
+	    
+	    here*/
             Match(Typed(compileExpression(cond), Ident("Any".toTypeName)), List(
               CaseDef(Apply(Ident("Some"), List(Bind("it", Ident("_")))), compile(thenEls)),
               CaseDef(Ident("None"), compile(elseEls)),
@@ -131,6 +145,58 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             Apply(Select(appender, "toString"), Nil)
         }
       }     
+    }
+
+    class LiteralASTSyntax extends CustomSyntax {
+      def subparse(code: String, unit: CompilationUnit, pos: Position): Tree = {
+        import nsc.util._
+        val un = new CompilationUnit(new ScriptSourceFile(unit.source.asInstanceOf[BatchSourceFile], code.toCharArray, pos.startOrPoint))
+        val scanner = new syntaxAnalyzer.UnitParser(un)
+        scanner.expr()
+      }
+      def insertPlaceHolders(t: Tree) = {
+	println("Trying to insert place holders")
+
+	val res = new scala.collection.mutable.ArrayBuffer[Tree]
+	def storeAway(t: Tree): Int = {
+	  println("Replacing "+t)
+	  res.append(t)
+	  res.size - 1
+	}
+	
+	object PlaceHolderTransformer extends Transformer {
+	  val Tilde = "unary_$tilde".toTermName
+	  override def transform(t: Tree): Tree = t match {
+	    case Select(tree, Tilde) => Ident("$$placeholder$$"+storeAway(tree))
+	    case _ => super.transform(t)
+	  }
+	}
+
+	(PlaceHolderTransformer.transform(t), res.toArray)
+      }
+      def reinsert(map: Array[Tree])(t: Tree): Tree = {
+	object ReinsertTransformer extends Transformer {
+	  val IdentName = "Ident".toTermName
+	  val PlaceHolder = "\\$\\$placeholder\\$\\$(\\d+)".r
+	  override def transform(t: Tree): Tree = t match {
+	    case Apply(Ident(IdentName), List(Literal(Constant(PlaceHolder(id))))) => map(Integer.parseInt(id))
+	    case _ => super.transform(t)
+	  }
+	}
+	ReinsertTransformer.transform(t)
+      }
+      override def parse(code: String, unit: CompilationUnit, pos: Position) = {
+	def nodeToString(t: Tree): String = printer(t)
+
+	println("Trying to parse "+code)
+	val (res, replacements) = insertPlaceHolders(subparse(code, unit, pos)) 
+	println("Code eq to "+nodeToString(res))
+	val parsedAs = subparse(nodeToString(res), unit, pos)
+	println("Was parsed as "+parsedAs)
+	val res2 = reinsert(replacements)(parsedAs)
+	println("Gencode: "+res2)
+	res2
+      }
     }
 
     class ESTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
@@ -204,6 +270,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             case Some(v) =>
               val oldParser = parser
               
+	      //parser = Some(new LiteralASTSyntax)
               parser = ParserFactory.parser(v).map(new ESSyntax(_))
               if (!parser.isDefined)
                 error(tree.pos, "EnhancedString syntax with version "+v+" not found.")

@@ -6,4 +6,6 @@ class EnhancedStrings(info: ProjectInfo) extends DefaultProject(info) with AutoC
   
   override def compileOptions = super.compileOptions ++ Seq(Unchecked)
   override def packageAction = super.packageAction dependsOn(compile, test)
+  
+  val es = compilerPlugin("net.virtualvoid" %% "scala-enhanced-stringis" % "0.6.1")
 }
