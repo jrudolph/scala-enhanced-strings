@@ -34,13 +34,21 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
     def newTransformer(unit: CompilationUnit) = new ESTransformer(unit)
 
-    class ESTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
-      localTyper = analyzer.newTyper(analyzer.rootContext(unit, EmptyTree, false))
-      import unit.error
+    /** The interface to implement if you want to reparse a string constant
+     */
+    trait CustomSyntax {
+      def parse(code: String, unit: CompilationUnit, pos: Position): Tree
+    }
+
+    class ESSyntax(parser: ESParser) extends CustomSyntax {
+      def parse(code: String, unit: CompilationUnit, pos: Position): Tree =
+	compiled(parser.parse(code), unit, pos)
 
       def it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
 
-      def compiled(els: AST.FormatElementList, pos: Position): Tree = {
+      def compiled(els: AST.FormatElementList, unit: CompilationUnit, pos: Position): Tree = {
+	import unit.error
+
 	import scala.util.parsing.input.Positional
         def startOf(e: Positional): Position = e.pos match {
 	  // in case, we don't have a real position, this is only an approximation
@@ -53,7 +61,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	    val start = pos.startOrPoint + e.pos.column
 	    new scala.tools.nsc.util.RangePosition(pos.source, start, start, start + length)
 	}
-        def compile(els: AST.FormatElementList): Tree = compiled(els, pos)
+        def compile(els: AST.FormatElementList): Tree = compiled(els, unit, pos)
 
         def compileParentExpressionInner(inner: AST.Exp, outer: Tree): Tree = inner match {
           case AST.ParentExp(inner, parent) => atPos(positionOf(inner, parent.length))(compileParentExpressionInner(inner, Select(outer, parent)))
@@ -122,7 +130,12 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
             Apply(Select(appender, "toString"), Nil)
         }
-      }
+      }     
+    }
+
+    class ESTransformer(unit: CompilationUnit) extends TypingTransformer(unit) {
+      localTyper = analyzer.newTyper(analyzer.rootContext(unit, EmptyTree, false))
+      import unit.error
 
       /** Strip off the delimiters of a string constant's position */
       def fixPosition(pos: Position, len: Int): Position = pos match {
@@ -142,8 +155,8 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       def postTransform(tree: Tree): Tree = tree match {
         case Literal(Constant(str: String)) =>
           try {
-            println(parser.get.Version)
-            atPos(tree.pos.makeTransparent)(compiled(parser.get.parse(str), fixPosition(tree.pos, str.length)))
+            //println(parser.get.Version)
+            atPos(tree.pos.makeTransparent)(parser.get.parse(str, unit, fixPosition(tree.pos, str.length)))
           } catch {
             case p: ParseException => p.printStackTrace; unit.error(tree.pos, p.getMessage); tree
             case e: TypeError => localTyper.reportTypeError(tree.pos, e); tree
@@ -175,7 +188,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
         case _ => (m, None)
       }
 
-      var parser: Option[ESParser] = None
+      var parser: Option[CustomSyntax] = None
 
       def withMods(tree: Tree, newMods: Modifiers): Tree = tree match {
 	case d: DefDef    => d.copy(mods = newMods)
@@ -191,7 +204,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             case Some(v) =>
               val oldParser = parser
               
-              parser = ParserFactory.parser(v)
+              parser = ParserFactory.parser(v).map(new ESSyntax(_))
               if (!parser.isDefined)
                 error(tree.pos, "EnhancedString syntax with version "+v+" not found.")
               
