@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+			<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" ></meta>
+        <title>Syntax.scala</title>
+        <script type="text/javascript" src="jquery-all.js"></script>
+        <script type="text/javascript" src="linked.js"></script>
+        <link rel="stylesheet" type="text/css" href="style.css" title="Style"></link>
+    </head>
+    <body>
+        <pre>
+<span class="keyword">package</span> net.virtualvoid.strings
+
+@EnhanceStrings<span class="delimiter">(</span>syntax=&quot;<span class="string">poros</span>&quot;, version=<span class="int">1</span><span class="delimiter">)</span>
+<span class="keyword">object</span> <a title="object net.virtualvoid.strings.Syntax" id="9129">Syntax</a> <span title="ScalaObject" class="keyword">extends</span> <a href="Overview.scala.html#9120" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> <span class="delimiter">{</span>
+  <span class="comment">/* The plugin reinforces string constants with several new possibilities
+     to add data into a String.
+
+     The easiest enhanced string is just a literal string without any
+     control characters. */</span>
+  <span class="keyword">val</span> <a title="java.lang.String" id="15551">literalString</a> = &quot;<span title="java.lang.String(&quot;This is just a normal String&quot;)" class="string">This is just a normal String</span>&quot;
+
+  <span class="comment">/* For the more interesting features, the two important concepts to
+     know are */</span> <a href="#15553" title="object net.virtualvoid.strings.Syntax.Expressions">Expressions</a>; <span class="comment">/* and */</span> <a href="#15555" title="object net.virtualvoid.strings.Syntax.Conversions">Conversions</a>
+
+  <span class="keyword">object</span> <a title="object net.virtualvoid.strings.Syntax.Expressions" id="15553">Expressions</a> <span title="ScalaObject" class="delimiter">{</span>
+
+    <span class="comment">/* Expressions are introduced by the # (sharp) sign */</span>
+    <span class="keyword">val</span> <a title="Int" id="15883">x</a> = <span title="Int(5)" class="int">5</span>
+    <span class="keyword">val</span> <a title="String" id="15885">stringWithNumber</a> = &quot;<span title="java.lang.String(&quot;The number is &quot;)" class="string">The number is </span>#<a href="#15883" title="=&gt; Int">x</a><span title="java.lang.String(&quot;!&quot;)" class="string">!</span>&quot;
+
+    <span class="comment">/* With this syntax, you can access the value of a variable from
+       the scope. Properties (ie methods with no parameters)
+       can be accessed with the usual dot notation. */</span>
+    <span class="keyword">val</span> <a title="java.lang.String" id="15887">aString</a> = &quot;<span title="java.lang.String(&quot;test&quot;)" class="string">test</span>&quot;
+    <span class="keyword">val</span> <a title="String" id="15889">info</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>#<a href="#15887" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>&quot;
+
+    <span class="comment">/* To declare unambigiously where an expression ends, put it into
+       braces */</span>
+    <span class="keyword">val</span> <a title="String" id="15891">braced</a> = &quot;<span title="java.lang.String(&quot;Length: &quot;)" class="string">Length: </span>#{<a href="#15887" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>}<span title="java.lang.String(&quot;.stuff&quot;)" class="string">.stuff</span>&quot;
+
+    <span class="comment">// val unbraced = &quot;Length: #aString.length.stuff&quot;</span>
+    <span class="comment">// error here: &quot;value stuff is not a member of Int&quot;</span>
+
+    <span class="comment">/* Up until now, you've just seen simple expressions, the full power
+       unleashes when you insert arbitrary Scala expressions into a string
+       using #{{ ... }} */</span> 
+    <span class="keyword">val</span> <a title="String" id="15893">inStringCalculation</a> = &quot;<span title="java.lang.String(&quot;What is x + 5 + 12? &quot;)" class="string">What is x + 5 + 12? </span>#{{ <a href="#15883" title="(x$1: Int)Int">x</a> <span title="(x$1: Int)Int">+</span> <span title="Int(5)" class="int">5</span> + <span title="Int(12)" class="int">12</span> }}&quot;
+  <span class="delimiter">}</span>
+  
+  <span class="comment">/* Not all expressions evaluate to a String value. There are some
+     convenience */</span> <a href="#15555" title="object net.virtualvoid.strings.Syntax.Conversions">Conversions</a> <span class="comment">/* built directly into the syntax */</span>
+  
+  <span class="keyword">object</span> <a title="object net.virtualvoid.strings.Syntax.Conversions" id="15555">Conversions</a> <span title="ScalaObject" class="delimiter">{</span>
+    <span class="comment">/* For each expression, a conversion to String is needed. If you
+       don't define any conversion, the value is converted by calling
+       the `toString` method of the value.
+
+       Recall the example from the last section: */</span>
+
+    <span class="keyword">val</span> <a title="java.lang.String" id="15896">aString</a> = &quot;<span title="java.lang.String(&quot;test&quot;)" class="string">test</span>&quot;
+    <span class="keyword">val</span> <a title="String" id="15898">info</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>#<a href="#15896" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>&quot;
+    
+    <a href="#15896" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span> <span class="comment">/* is of type Int, so it has to be converted to a String
+       before it can be appended to the rest of the String. Behind the scenes,
+       ScalaEnhancedStrings creates code like this: */</span>
+
+    <span class="keyword">val</span> <a title="java.lang.String" id="15900">infoAfterSeS</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>&quot;+<a href="#15896" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>.<span title="()java.lang.String">toString</span>
+
+
+    <span class="comment">/* More interesting is the set of built-in conversions and the
+       syntax to use them. (Note: the set of conversions is by no means
+       complete yet.  If you are missing something, please say so.)
+
+       First, there is support for conditional string formatting with the
+       conversion syntax `?[&lt;then-string&gt;|&lt;else-string&gt;]` */</span>
+
+    <span class="keyword">val</span> <a title="Boolean" id="15902">isSummer</a> = <span title="Boolean(true)" class="keyword">true</span>
+    <span class="keyword">def</span> <a title="=&gt; Unit" id="15904">proclaimTemperature</a> =
+      <span title="(x: Any)Unit">println</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;It is so &quot;)" class="string">It is so </span>#<a href="#15902" title="=&gt; Boolean">isSummer</a>?[<span title="java.lang.String(&quot;hot&quot;)" class="string">hot</span>|<span title="java.lang.String(&quot;cold&quot;)" class="string">cold</span>]&quot;<span class="delimiter">)</span>
+
+    <span class="comment">/* For */</span> <span title="object Option">Option</span><span class="comment">/*-al values the same syntax applies. In the
+     &lt;then-string&gt; there is the expression #it or #this available,
+     which refers to the contents of the */</span> <span title="object Option">Option</span> <span class="comment">/* value */</span>
+
+    <span class="keyword">val</span> <a title="Option[String]" id="15905">optionalBeer</a>: <span title="Option[String]">Option</span><span class="delimiter">[</span>String<span class="delimiter">]</span> = <span title="(x: java.lang.String)Some[java.lang.String]">Some</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;Rothaus&quot;)" class="string">Rothaus</span>&quot;<span class="delimiter">)</span>
+    <span class="keyword">val</span> <a title="String" id="15907">thirstyMan</a> = &quot;<span title="java.lang.String(&quot;He's drinking &quot;)" class="string">He's drinking </span>#<a href="#15905" title="=&gt; Option[String]">optionalBeer</a>?[<span title="java.lang.String(&quot;his &quot;)" class="string">his </span>#<a href="#16136" title="Any">it</a>|<span title="java.lang.String(&quot;nothing&quot;)" class="string">nothing</span>]&quot;
+    <span class="comment">// evaluates to &quot;He's drinking his Rothaus&quot;</span>
+
+    <span class="comment">/* Then, there's support for formatting whole sequences of values (of type Iterator)
+       by using the `[&lt;inner_formatter&gt;]{&lt;separator&gt;}*` syntax.
+       Inside of the &lt;inner_formatter&gt; you can access the current element
+       by #it or #this. The asterisk '*' at the end in enhanced string syntax
+       instructs the plugin to expand all these values, format each element
+       as specified with the inner formater and then join them together
+       using the separator */</span>
+
+    <span class="keyword">val</span> <a title="List[java.lang.String]" id="15909">fruit</a> = <span title="(xs: java.lang.String*)List[java.lang.String]">List</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;Apple&quot;)" class="string">Apple</span>&quot;, &quot;<span title="java.lang.String(&quot;Orange&quot;)" class="string">Orange</span>&quot;, &quot;<span title="java.lang.String(&quot;Lemon&quot;)" class="string">Lemon</span>&quot;, &quot;<span title="java.lang.String(&quot;Banana&quot;)" class="string">Banana</span>&quot;<span class="delimiter">)</span>
+    <span class="keyword">val</span> <a title="String" id="15911">breakfast</a> = &quot;<span title="java.lang.String(&quot;Today there's &quot;)" class="string">Today there's </span>#<a href="#15909" title="=&gt; List[java.lang.String]">fruit</a>[<span title="java.lang.String(&quot;the tasty &quot;)" class="string">the tasty </span>#<a href="#16353" title="java.lang.String">it</a>]{, }*<span title="java.lang.String(&quot; in my yoghurt&quot;)" class="string"> in my yoghurt</span>&quot;
+    <span class="comment">// == &quot;Today there's the tasty Apple, the tasty Orange ...</span>
+
+    <span class="comment">/* The inner part of the last string could be rewritten as */</span>
+    <a href="#15909" title="=&gt; List[java.lang.String]">fruit</a>.<span title="(f: (java.lang.String) =&gt; java.lang.String)(implicit bf: scala.collection.generic.CanBuildFrom[List[java.lang.String],java.lang.String,List[java.lang.String]])List[java.lang.String]">map</span><span title="scala.collection.generic.CanBuildFrom[scala.collection.immutable.List.Coll,java.lang.String,List[java.lang.String]]" class="delimiter">(</span><a title="java.lang.String" id="17720">it</a> =&gt; &quot;<span title="java.lang.String(&quot;the tasty &quot;)" class="string">the tasty </span>&quot;+<a href="#17720" title="java.lang.String">it</a>.<span title="()java.lang.String">toString</span><span class="delimiter">)</span>.<span title="(sep: String)String">mkString</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;, &quot;)" class="string">, </span>&quot;<span class="delimiter">)</span>
+    <span class="comment">/* in fact, this is exactly what the plugin does. */</span>
+  
+    <span class="comment">/* You can omit the &lt;inner_formater&gt; in which case #it is assumed. You
+       can omit the separator, as well, in which case the separator is the empty string. */</span>
+  
+    <span class="keyword">val</span> <a title="String" id="15913">allDigits</a> = &quot;#{{<span title="(end: Int)scala.collection.immutable.Range.Inclusive with scala.collection.immutable.Range.ByOne" class="int">0</span> to <span title="Int(9)" class="int">9</span>}}*&quot; <span class="comment">// == &quot;0123456789&quot;</span>
+
+  <span class="delimiter">}</span>
+
+  <span class="comment">/* next chapter: */</span> <a href="Stuff.scala.html#9124" title="object net.virtualvoid.strings.Stuff">Stuff</a>
+<span class="delimiter">}</span>
+
+<span class="comment">/* SeS - Scala Enhanced Strings
+ * Copyright 2008 - 2010 Johannes Rudolph
+ * Visit http://github.com/jrudolph/scala-enhanced-strings
+ * File bugs at http://github.com/jrudolph/scala-enhanced-strings/issues
+ * Mailing list at http://groups.google.com/group/scala-enhanced-strings
+ */</span>
+
+        </pre>
+    </body>
+</html>

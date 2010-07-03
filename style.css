@@ -1,0 +1,77 @@
+body { 
+	background: black; 
+	color: #DDDDDD;
+}
+
+pre, code {
+	font-family: Inconsolata, Monaco, Consolas, monospace;
+	font-size: 16pt;
+	line-height: 20px;
+}
+
+/* syntax highlighting */
+.keyword { font-weight: bolder; color: #777777; font-variant: small-caps; font-size: smaller;}
+.string { color: #BFFFCE; }
+.symbol { color: red; font-weight: bolder;}
+.char { color: #FF00FF; }
+.double { color: blue; }
+.float { color: blue; }
+.long { color: #008080; }
+.int { color: #4200DF; }
+.comment { 
+	color: #BFD0FF;
+	font-size: 14pt;
+	font-style: italic; 
+	font-family: serif;
+	line-height: normal;
+}
+.delimiter {
+    color: #777777;
+}
+
+a { color: #aa0000; }
+a:link {
+    color: #DF0000;
+}
+
+a:visited {
+    color: #DF0000;
+}
+
+/* to highlight a reference or definition */
+:target, .highlighted
+{
+    background-color: #444444;
+    color: #FF910F;
+}
+
+body {
+	font-family: Helvetica, Arial;
+	font-size: 12px;
+}
+
+div.tool {
+	display: none;
+	position:  fixed;
+	bottom: 0;
+	background-color: rgb(48, 48, 48);
+	color: rgb(243, 243, 243);
+	padding: 5px;
+}
+
+div.tool a, div.tool a:visited, div.tool a:link {
+	color: white;
+	font-weight: bold;
+}
+
+div#export-control { right: 0; text-align: right; }
+div#export-control a { padding: 0 5px; }
+div#export { left: 0; width: 100%; }
+div#export code { display: block; padding-right: 60px; }
+
+div#pop-out { left: 0; width: 100%; }
+
+div#pop-out input {
+	margin-right: .75em;
+	vertical-align: middle;
+}
