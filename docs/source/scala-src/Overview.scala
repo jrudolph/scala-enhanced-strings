@@ -1,6 +1,6 @@
 package net.virtualvoid.strings
 
-/* Welcome to these pages! This is the documentation for the
+/* Welcome! This is the documentation for the
    Scala Enhanced Strings (SeS) compiler plugin. */
 
 class ScalaEnhancedStrings {

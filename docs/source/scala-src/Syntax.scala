@@ -18,9 +18,9 @@ object Syntax extends ScalaEnhancedStrings {
     val x = 5
     val stringWithNumber = "The number is #x!"
 
-    /* With this simple syntax, only simple expressions can be inserted
-       into the string. Simple expressions are comprised of paths of
-       identifiers */
+    /* With this syntax, you can access the value of a variable from
+       the scope. Properties (ie methods with no parameters)
+       can be accessed with the usual dot notation. */
     val aString = "test"
     val info = "aString has the length #aString.length"
 
@@ -28,7 +28,7 @@ object Syntax extends ScalaEnhancedStrings {
        braces */
     val braced = "Length: #{aString.length}.stuff"
 
-    // val braced2 = "Length: #aString.length.stuff"
+    // val unbraced = "Length: #aString.length.stuff"
     // error here: "value stuff is not a member of Int"
 
     /* Up until now, you've just seen simple expressions, the full power
@@ -37,12 +37,27 @@ object Syntax extends ScalaEnhancedStrings {
     val inStringCalculation = "What is x + 5 + 12? #{{ x + 5 + 12 }}"
   }
   
+  /* Not all expressions evaluate to a String value. There are some
+     convenience */ Conversions /* built directly into the syntax */
+  
   object Conversions {
     /* For each expression, a conversion to String is needed. If you
        don't define any conversion, the value is converted by calling
        the `toString` method of the value.
-     
-       More interesting is the set of built-in conversions and the
+
+       Recall the example from the last section: */
+
+    val aString = "test"
+    val info = "aString has the length #aString.length"
+    
+    aString.length /* is of type Int, so it has to be converted to a String
+       before it can be appended to the rest of the String. Behind the scenes,
+       ScalaEnhancedStrings creates code like this: */
+
+    val infoAfterSeS = "aString has the length "+aString.length.toString
+
+
+    /* More interesting is the set of built-in conversions and the
        syntax to use them. (Note: the set of conversions is by no means
        complete yet.  If you are missing something, please say so.)
 
@@ -75,7 +90,7 @@ object Syntax extends ScalaEnhancedStrings {
 
     /* The inner part of the last string could be rewritten as */
     fruit.map(it => "the tasty "+it.toString).mkString(", ")
-    /* in fact, this is exactly what the plugin is doing. */
+    /* in fact, this is exactly what the plugin does. */
   
     /* You can omit the <inner_formater> in which case #it is assumed. You
        can omit the separator, as well, in which case the separator is the empty string. */
