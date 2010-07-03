@@ -18,7 +18,7 @@ object Stuff extends ScalaEnhancedStrings {
     /*
        - The parser may a bit unreliable at the edges.
        - Missing specification for min/max-lengths for replacements like in */
-         String.format /*
+         String.format(_: String) /*
        - More conversions needed       
      */
   }
