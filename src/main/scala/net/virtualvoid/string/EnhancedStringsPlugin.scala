@@ -131,7 +131,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 	  val end = p.end
 	  val lengthWithDelims = end - start
 	  val delims = (lengthWithDelims - len) / 2 - 1
-	  println("Found delims of total length "+(lengthWithDelims - len))
+	  //println("Found delims of total length "+(lengthWithDelims - len))
 	  new scala.tools.nsc.util.RangePosition(p.source, start+delims, start+delims, end-delims)
 	case _ => pos
       }
@@ -142,7 +142,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       def postTransform(tree: Tree): Tree = tree match {
         case Literal(Constant(str: String)) =>
           try {
-            println(parser.get.Version)
+            //println(parser.get.Version)
             atPos(tree.pos.makeTransparent)(compiled(parser.get.parse(str), fixPosition(tree.pos, str.length)))
           } catch {
             case p: ParseException => p.printStackTrace; unit.error(tree.pos, p.getMessage); tree
@@ -195,7 +195,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
               if (!parser.isDefined)
                 error(tree.pos, "EnhancedString syntax with version "+v+" not found.")
               
-              println("Version now " + v)
+              //println("Version now " + v)
               val res = super.transform(tree)
               
               parser = oldParser
@@ -203,7 +203,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             case None =>
               super.transform(tree)
           }
-        case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), List(x)) => println(x.getClass); super.transform(tree)
+        //case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), List(x)) => println(x.getClass); super.transform(tree)
         case _ if parser.isDefined => postTransform(super.transform(tree))
         case _ => super.transform(tree)
       }
