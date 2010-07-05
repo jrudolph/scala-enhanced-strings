@@ -12,33 +12,50 @@
         <pre>
 <span class="keyword">package</span> net.virtualvoid.strings
 
-<span class="keyword">object</span> <a title="object net.virtualvoid.strings.Stuff" id="9124">Stuff</a> <span title="ScalaObject" class="keyword">extends</span> <a href="Overview.scala.html#9120" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> <span class="delimiter">{</span>
-  <span class="keyword">val</span> <a title="java.lang.String" id="15729">license</a> = &quot;<span class="string">BSD License</span>&quot;
+<span class="keyword">object</span> <a title="object net.virtualvoid.strings.Stuff" id="9120">Stuff</a> <span title="ScalaObject" class="keyword">extends</span> <a href="Overview.scala.html#9116" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> <span class="delimiter">{</span>
+  <span class="keyword">val</span> <a title="java.lang.String" id="15725">license</a> = &quot;<span class="string">BSD License</span>&quot;
 
-  <span class="keyword">trait</span> <a title="trait Facts extends java.lang.Object with ScalaObject" id="15731">Facts</a> <span title="ScalaObject" class="delimiter">{</span>
-    <span class="keyword">class</span> <a title="class EnhancedStringsPlugin extends java.lang.Object with ScalaObject" id="15784">EnhancedStringsPlugin</a> <span title="ScalaObject" class="delimiter">{</span>
-      <span class="keyword">val</span> <a title="java.lang.String" id="15788">runsAfter</a> = &quot;<span class="string">parser</span>&quot;
+  <span class="keyword">trait</span> <a title="trait Facts extends java.lang.Object with ScalaObject" id="15727">Facts</a> <span title="ScalaObject" class="delimiter">{</span>
+    <span class="keyword">class</span> <a title="class EnhancedStringsPlugin extends java.lang.Object with ScalaObject" id="15781">EnhancedStringsPlugin</a> <span title="ScalaObject" class="delimiter">{</span>
+      <span class="keyword">val</span> <a title="java.lang.String" id="15785">runsAfter</a> = &quot;<span class="string">parser</span>&quot;
     <span class="delimiter">}</span>
     
-    <span class="comment">/* To see the code the plugin generates use this command line
-       while compiling:
-
-       scalac -Xplugin:... -Xprint:enhanced-strings */</span>
+    <span class="comment">/*
+       - To see the code the plugin generates use this command line
+	 while compiling:
+         
+	 scalac -Xplugin:... -Xprint:enhanced-strings
+         
+       - Most of the plugin is a spin-off of work I've done
+         before. When the topic of variable interpolation was
+         mentioned on the mailing list in summer 2009 I could quickly
+         hack together a basically working version because I've
+         already had a parser available. Literal Scala expressions
+         aside, you can use the formatter without the plugin
+         standalone, doing all the parsing at runtime. There's a
+         currently unmaintained module which compiles a formatting
+         string to bytecodes at runtime, as well.  */</span>
   <span class="delimiter">}</span>
-
-  <span class="keyword">trait</span> <a title="trait KnownIssues extends java.lang.Object with ScalaObject" id="15732">KnownIssues</a> <span title="ScalaObject" class="delimiter">{</span>
+  <span class="keyword">trait</span> <a title="trait IDEIntegration extends java.lang.Object" id="15728">IDEIntegration</a> <span title="java.lang.Object" class="delimiter">{</span>
+    <span class="comment">/* Syntax highlighting doesn't work in IDEs. However, at least in ensime
+       the common features are working: error reporting, showing types, inspecting
+       variables. (Only, if you make ensime compile with the plugin enabled, which
+       I managed to do only by enabling it directly in ensime's sources.)
+     */</span>
+  <span class="delimiter">}</span>
+  <span class="keyword">trait</span> <a title="trait KnownIssues extends java.lang.Object" id="15729">KnownIssues</a> <span title="java.lang.Object" class="delimiter">{</span>
     <span class="comment">/*
        - The parser may a bit unreliable at the edges.
-       - Missing specification for min/max-lengths for replacements like in */</span>
-         <span title="object java.lang.String">String</span>.<span title="(x$1: java.lang.String,x$2: &lt;repeated...&gt;[java.lang.Object])java.lang.String">format</span><span class="delimiter">(</span><a href="#15796" title="String">_</a>: <span title="String">String</span><span class="delimiter">)</span> <span class="comment">/*
        - More conversions needed       
      */</span>
   <span class="delimiter">}</span>
-  <span class="keyword">trait</span> <a title="trait Contact extends java.lang.Object with ScalaObject" id="15733">Contact</a> <span title="ScalaObject" class="delimiter">{</span>
-    <span class="keyword">val</span> <a title="java.lang.String" id="15869">authorsEmail</a> = &quot;<span class="string">johannes.rudolph@gmail.com</span>&quot;
-    <span class="keyword">val</span> <a title="java.lang.String" id="15871">mailingList</a> = &quot;<span class="string">http://groups.google.com/group/scala-enhanced-strings</span>&quot;
-    <span class="keyword">val</span> <a title="java.lang.String" id="15873">bugTracker</a> = &quot;<span class="string">http://github.com/jrudolph/scala-enhanced-strings/issues</span>&quot;
+  <span class="keyword">trait</span> <a title="trait Contact extends java.lang.Object with ScalaObject" id="15730">Contact</a> <span title="ScalaObject" class="delimiter">{</span>
+    <span class="keyword">val</span> <a title="java.lang.String" id="15792">authorsEmail</a> = &quot;<span class="string">johannes.rudolph@gmail.com</span>&quot;
+    <span class="keyword">val</span> <a title="java.lang.String" id="15794">mailingList</a> = &quot;<span class="string">http://groups.google.com/group/scala-enhanced-strings</span>&quot;
+    <span class="keyword">val</span> <a title="java.lang.String" id="15796">bugTracker</a> = &quot;<span class="string">http://github.com/jrudolph/scala-enhanced-strings/issues</span>&quot;
   <span class="delimiter">}</span>
+
+  <span class="comment">/* This documentation was formatted by Mark Harrah's sxr */</span>
 <span class="delimiter">}</span>
 
 <span class="comment">/* SeS - Scala Enhanced Strings

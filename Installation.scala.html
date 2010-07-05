@@ -12,11 +12,11 @@
         <pre>
 <span class="keyword">package</span> net.virtualvoid.strings
 
-<span class="keyword">object</span> <a title="object net.virtualvoid.strings.Installation" id="9106">Installation</a> <span title="ScalaObject" class="keyword">extends</span> <a href="Overview.scala.html#9120" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> 
-  <span class="keyword">with</span> <a href="#9108" title="net.virtualvoid.strings.StandaloneUsage">StandaloneUsage</a>
-  <span class="keyword">with</span> <a href="#9109" title="net.virtualvoid.strings.UseWithSBT">UseWithSBT</a> 
+<span class="keyword">object</span> <a title="object net.virtualvoid.strings.Installation" id="9102">Installation</a> <span title="ScalaObject" class="keyword">extends</span> <a href="Overview.scala.html#9116" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> 
+  <span class="keyword">with</span> <a href="#9104" title="net.virtualvoid.strings.StandaloneUsage">StandaloneUsage</a>
+  <span class="keyword">with</span> <a href="#9105" title="net.virtualvoid.strings.UseWithSBT">UseWithSBT</a> 
 
-<span class="keyword">trait</span> <a title="trait StandaloneUsage extends java.lang.Object" id="9108">StandaloneUsage</a> <span title="java.lang.Object" class="delimiter">{</span>
+<span class="keyword">trait</span> <a title="trait StandaloneUsage extends java.lang.Object" id="9104">StandaloneUsage</a> <span title="java.lang.Object" class="delimiter">{</span>
   <span class="comment">/*
      - Grab the latest jar file from http://github.com/jrudolph/scala-enhanced-strings/downloads.
      - Call scalac with -Xplugin:&lt;path-to-jar&gt;
@@ -24,46 +24,46 @@
    */</span>
 <span class="delimiter">}</span>
 
-<span class="keyword">trait</span> <a title="trait UseWithSBT extends java.lang.Object with ScalaObject" id="9109">UseWithSBT</a> <span title="ScalaObject" class="delimiter">{</span>
+<span class="keyword">trait</span> <a title="trait UseWithSBT extends java.lang.Object with ScalaObject" id="9105">UseWithSBT</a> <span title="ScalaObject" class="delimiter">{</span>
   <span class="comment">/* See the usage example at http://github.com/jrudolph/scala-enhanced-strings/tree/master/usage
      or here: */</span>
   
   <span class="comment">/* Starting with a normal project descriptor... */</span>
   <span class="keyword">import</span> sbt._
 
-  <span class="keyword">class</span> <a title="class ESUsageExample extends sbt.DefaultProject with sbt.AutoCompilerPlugins with ScalaObject" id="9141">ESUsageExample</a><span title="ScalaObject" class="delimiter">(</span><a title="sbt.ProjectInfo" id="13602">info</a>: <span title="sbt.ProjectInfo">ProjectInfo</span><span class="delimiter">)</span> 
-    <span class="keyword">extends</span> <span title="sbt.DefaultProject">DefaultProject</span><span class="delimiter">(</span><a href="#13602" title="sbt.ProjectInfo">info</a><span class="delimiter">)</span> 
+  <span class="keyword">class</span> <a title="class ESUsageExample extends sbt.DefaultProject with sbt.AutoCompilerPlugins with ScalaObject" id="9137">ESUsageExample</a><span title="ScalaObject" class="delimiter">(</span><a title="sbt.ProjectInfo" id="13598">info</a>: <span title="sbt.ProjectInfo">ProjectInfo</span><span class="delimiter">)</span> 
+    <span class="keyword">extends</span> <span title="sbt.DefaultProject">DefaultProject</span><span class="delimiter">(</span><a href="#13598" title="sbt.ProjectInfo">info</a><span class="delimiter">)</span> 
     <span class="comment">/* ... extend your project descriptor */</span>
     <span class="keyword">with</span> <span title="sbt.AutoCompilerPlugins">AutoCompilerPlugins</span> <span class="delimiter">{</span>
   
-    <span class="keyword">val</span> <a title="String" id="10740">virtualVoid</a> = &quot;<span class="string">Virtual-Void repository</span>&quot; at &quot;<span class="string">http://mvn.virtual-void.net</span>&quot;
+    <span class="keyword">val</span> <a title="String" id="10736">virtualVoid</a> = &quot;<span class="string">Virtual-Void repository</span>&quot; at &quot;<span class="string">http://mvn.virtual-void.net</span>&quot;
 
-    <span class="keyword">val</span> <a title="Null" id="10742">es</a> = <a href="#9141" title="(str: String)Null">compilerPlugin</a><span class="delimiter">(</span>&quot;<span class="string">net.virtualvoid</span>&quot; <span title="(next: String)String">%%</span> &quot;<span class="string">scala-enhanced-strings</span>&quot; % &quot;<span class="string">0.5</span>&quot;<span class="delimiter">)</span>
+    <span class="keyword">val</span> <a title="Null" id="10738">es</a> = <a href="#9137" title="(str: String)Null">compilerPlugin</a><span class="delimiter">(</span>&quot;<span class="string">net.virtualvoid</span>&quot; <span title="(next: String)String">%%</span> &quot;<span class="string">scala-enhanced-strings</span>&quot; % &quot;<span class="string">0.5</span>&quot;<span class="delimiter">)</span>
   <span class="delimiter">}</span>
 <span class="delimiter">}</span>
 
-<span class="keyword">object</span> <a title="object net.virtualvoid.strings.Usage" id="9110">Usage</a> <span title="ScalaObject" class="keyword">extends</span> <a href="Overview.scala.html#9120" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> <span class="delimiter">{</span>
-  <span class="comment">/* Make sure you have installed the jar as described in */</span> <a href="#9106" title="object net.virtualvoid.strings.Installation">Installation</a> <span class="comment">/*
+<span class="keyword">object</span> <a title="object net.virtualvoid.strings.Usage" id="9106">Usage</a> <span title="ScalaObject" class="keyword">extends</span> <a href="Overview.scala.html#9116" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> <span class="delimiter">{</span>
+  <span class="comment">/* Make sure you have installed the jar as described in */</span> <a href="#9102" title="object net.virtualvoid.strings.Installation">Installation</a> <span class="comment">/*
      At the scope where you want to use enhanced strings put a marker annotation:    */</span>
 
   @EnhanceStrings <span class="comment">// enhance strings in this scope</span>
-  <span class="keyword">trait</span> <a title="trait Example1 extends java.lang.Object with ScalaObject" id="13605">Example1</a> <span title="ScalaObject" class="delimiter">{</span>
-    <span class="keyword">val</span> <a title="Int" id="13610">x</a> = <span title="Int(5)" class="int">5</span>
-    <span class="keyword">val</span> <a title="String" id="13612">str</a> = &quot;<span title="java.lang.String(&quot;Inner string arithmetics: &quot;)" class="string">Inner string arithmetics: </span>#{{ <a href="#13610" title="(x$1: Int)Int">x</a> <span title="(x$1: Int)Int">*</span> <a href="#13610" title="=&gt; Int">x</a> + <span title="Int(12)" class="int">12</span> }}&quot;
+  <span class="keyword">trait</span> <a title="trait Example1 extends java.lang.Object with ScalaObject" id="13601">Example1</a> <span title="ScalaObject" class="delimiter">{</span>
+    <span class="keyword">val</span> <a title="Int" id="13606">x</a> = <span title="Int(5)" class="int">5</span>
+    <span class="keyword">val</span> <a title="String" id="13608">str</a> = &quot;<span title="java.lang.String(&quot;Inner string arithmetics: &quot;)" class="string">Inner string arithmetics: </span>#{{ <a href="#13606" title="(x$1: Int)Int">x</a> <span title="(x$1: Int)Int">*</span> <a href="#13606" title="=&gt; Int">x</a> + <span title="Int(12)" class="int">12</span> }}&quot;
   <span class="delimiter">}</span>
 
   <span class="comment">/* The current enhanced string syntax is not fixed. Actually, it is
      just a particular flavor. In the future there may be other
      flavors. You can specify which version you programmed against by
      specifying it in the @EnhancedStrings annotation. So your program
-     is compatible even with */</span> <span title="net.virtualvoid.strings.ScalaEnhancedStrings" class="keyword">new</span> <a href="Overview.scala.html#9120" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> <span class="comment">/* versions */</span>
+     is compatible even with */</span> <span title="net.virtualvoid.strings.ScalaEnhancedStrings" class="keyword">new</span> <a href="Overview.scala.html#9116" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> <span class="comment">/* versions */</span>
 
   @EnhanceStrings<span class="delimiter">(</span>syntax= &quot;<span class="string">poros</span>&quot;, version = <span class="int">1</span><span class="delimiter">)</span> <span class="comment">// poros is the default syntax flavor</span>
-  <span class="keyword">trait</span> <a title="trait Example2 extends java.lang.Object with ScalaObject" id="13606">Example2</a> <span title="ScalaObject" class="delimiter">{</span>
-    <span class="keyword">val</span> <a title="String" id="14201">x</a> = &quot;<span title="java.lang.String(&quot;The class of my parent object is: &quot;)" class="string">The class of my parent object is: </span>#<a href="#9110" title="object net.virtualvoid.strings.Usage">Usage</a>.<span title="()java.lang.Class[_]">getClass</span>&quot;
+  <span class="keyword">trait</span> <a title="trait Example2 extends java.lang.Object with ScalaObject" id="13602">Example2</a> <span title="ScalaObject" class="delimiter">{</span>
+    <span class="keyword">val</span> <a title="String" id="14197">x</a> = &quot;<span title="java.lang.String(&quot;The class of my parent object is: &quot;)" class="string">The class of my parent object is: </span>#<a href="#9106" title="object net.virtualvoid.strings.Usage">Usage</a>.<span title="()java.lang.Class[_]">getClass</span>&quot;
   <span class="delimiter">}</span>
 
-  <span class="comment">/* Next chapter: */</span> <a href="Syntax.scala.html#9129" title="object net.virtualvoid.strings.Syntax">Syntax</a>
+  <span class="comment">/* Next chapter: */</span> <a href="Syntax.scala.html#9125" title="object net.virtualvoid.strings.Syntax">Syntax</a>
 <span class="delimiter">}</span>
 
 <span class="comment">/* SeS - Scala Enhanced Strings
