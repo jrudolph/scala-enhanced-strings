@@ -20,60 +20,65 @@
 [Introduction.scala]
  9111 term net.virtualvoid.strings.Introduction
 [Syntax.scala]
- 15825 term net.virtualvoid.strings.Syntax.Conversions.isSummer
- 15825 term net.virtualvoid.strings.Syntax.Conversions.isSummer(2a880db3f601502d34dbcee48bf223ebec428d3c)
- 15810 term net.virtualvoid.strings.Syntax.Expressions.aString
- 15821 term net.virtualvoid.strings.Syntax.Conversions.info
- 15828 term net.virtualvoid.strings.Syntax.Conversions.optionalBeer
- 15819 term net.virtualvoid.strings.Syntax.Conversions.aString(e30a80d2b4700276248ce5925d94ebb97783d05d)
- 15808 term net.virtualvoid.strings.Syntax.Expressions.stringWithNumber(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
- 15821 term net.virtualvoid.strings.Syntax.Conversions.info(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
- 15806 term net.virtualvoid.strings.Syntax.Expressions.x(f94e34279774a33b0e784d726d315f41bbfccb90)
- 15806 term net.virtualvoid.strings.Syntax.Expressions.x
- 15830 term net.virtualvoid.strings.Syntax.Conversions.thirstyMan
- 15827 term net.virtualvoid.strings.Syntax.Conversions.proclaimTemperature(daa10c302f01ae891ab5ff7d9d7f177c59c78afc)
- 15812 term net.virtualvoid.strings.Syntax.Expressions.info(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
- 15834 term net.virtualvoid.strings.Syntax.Conversions.breakfast
- 15823 term net.virtualvoid.strings.Syntax.Conversions.infoAfterSeS(e30a80d2b4700276248ce5925d94ebb97783d05d)
- 15834 term net.virtualvoid.strings.Syntax.Conversions.breakfast(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
+ 15827 term net.virtualvoid.strings.Syntax.Conversions.isSummer
+ 15827 term net.virtualvoid.strings.Syntax.Conversions.isSummer(2a880db3f601502d34dbcee48bf223ebec428d3c)
+ 15553 term net.virtualvoid.strings.Syntax.ControlCharacterEscaping
+ 17908 term net.virtualvoid.strings.Syntax.ControlCharacterEscaping.notAnExpression
+ 15812 term net.virtualvoid.strings.Syntax.Expressions.aString
+ 15823 term net.virtualvoid.strings.Syntax.Conversions.info
+ 15830 term net.virtualvoid.strings.Syntax.Conversions.optionalBeer
+ 15821 term net.virtualvoid.strings.Syntax.Conversions.aString(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15810 term net.virtualvoid.strings.Syntax.Expressions.stringWithNumber(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
+ 15823 term net.virtualvoid.strings.Syntax.Conversions.info(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
+ 15808 term net.virtualvoid.strings.Syntax.Expressions.x(f94e34279774a33b0e784d726d315f41bbfccb90)
+ 15808 term net.virtualvoid.strings.Syntax.Expressions.x
+ 15832 term net.virtualvoid.strings.Syntax.Conversions.thirstyMan
+ 15829 term net.virtualvoid.strings.Syntax.Conversions.proclaimTemperature(daa10c302f01ae891ab5ff7d9d7f177c59c78afc)
+ 15814 term net.virtualvoid.strings.Syntax.Expressions.info(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
+ 17910 term net.virtualvoid.strings.Syntax.ControlCharacterEscaping.thisIsABar
+ 15836 term net.virtualvoid.strings.Syntax.Conversions.breakfast
+ 15825 term net.virtualvoid.strings.Syntax.Conversions.infoAfterSeS(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15836 term net.virtualvoid.strings.Syntax.Conversions.breakfast(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
  15551 term net.virtualvoid.strings.Syntax.Conversions
- 15816 term net.virtualvoid.strings.Syntax.Expressions.inStringCalculation
+ 15818 term net.virtualvoid.strings.Syntax.Expressions.inStringCalculation
  15549 term net.virtualvoid.strings.Syntax.Expressions
- 15819 term net.virtualvoid.strings.Syntax.Conversions.aString
- 15832 term net.virtualvoid.strings.Syntax.Conversions.fruit(f4166ef12758e51ed8eb323c0b70e4732d09a9e5)
- 15828 term net.virtualvoid.strings.Syntax.Conversions.optionalBeer(ee3848214515cb2cdf405a3d1c17433f5d452643)
- 15823 term net.virtualvoid.strings.Syntax.Conversions.infoAfterSeS
- 15812 term net.virtualvoid.strings.Syntax.Expressions.info
- 15836 term net.virtualvoid.strings.Syntax.Conversions.allDigits(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
- 15814 term net.virtualvoid.strings.Syntax.Expressions.braced
+ 15821 term net.virtualvoid.strings.Syntax.Conversions.aString
+ 15834 term net.virtualvoid.strings.Syntax.Conversions.fruit(f4166ef12758e51ed8eb323c0b70e4732d09a9e5)
+ 17910 term net.virtualvoid.strings.Syntax.ControlCharacterEscaping.thisIsABar(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15830 term net.virtualvoid.strings.Syntax.Conversions.optionalBeer(ee3848214515cb2cdf405a3d1c17433f5d452643)
+ 15825 term net.virtualvoid.strings.Syntax.Conversions.infoAfterSeS
+ 15814 term net.virtualvoid.strings.Syntax.Expressions.info
+ 17908 term net.virtualvoid.strings.Syntax.ControlCharacterEscaping.notAnExpression(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15838 term net.virtualvoid.strings.Syntax.Conversions.allDigits(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
+ 15816 term net.virtualvoid.strings.Syntax.Expressions.braced
  15547 term net.virtualvoid.strings.Syntax.literalString
- 15808 term net.virtualvoid.strings.Syntax.Expressions.stringWithNumber
- 15814 term net.virtualvoid.strings.Syntax.Expressions.braced(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
- 15816 term net.virtualvoid.strings.Syntax.Expressions.inStringCalculation(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
- 15830 term net.virtualvoid.strings.Syntax.Conversions.thirstyMan(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
+ 15810 term net.virtualvoid.strings.Syntax.Expressions.stringWithNumber
+ 15816 term net.virtualvoid.strings.Syntax.Expressions.braced(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
+ 15818 term net.virtualvoid.strings.Syntax.Expressions.inStringCalculation(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
+ 15832 term net.virtualvoid.strings.Syntax.Conversions.thirstyMan(3bf7c90be758f5b946ae171b872e4a2ff5affba6)
  15547 term net.virtualvoid.strings.Syntax.literalString(e30a80d2b4700276248ce5925d94ebb97783d05d)
- 15836 term net.virtualvoid.strings.Syntax.Conversions.allDigits
+ 15838 term net.virtualvoid.strings.Syntax.Conversions.allDigits
  9125 term net.virtualvoid.strings.Syntax
- 15810 term net.virtualvoid.strings.Syntax.Expressions.aString(e30a80d2b4700276248ce5925d94ebb97783d05d)
- 15832 term net.virtualvoid.strings.Syntax.Conversions.fruit
+ 15812 term net.virtualvoid.strings.Syntax.Expressions.aString(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15834 term net.virtualvoid.strings.Syntax.Conversions.fruit
 [Overview.scala]
  9131 term net.virtualvoid.strings.ScalaEnhancedStrings.chapters
  9116 type net.virtualvoid.strings.ScalaEnhancedStrings
  9131 term net.virtualvoid.strings.ScalaEnhancedStrings.chapters(de9f62e83e7bfea16d803905deb646b17a824c79)
 [Stuff.scala]
- 15796 term net.virtualvoid.strings.Stuff.Contact.bugTracker
- 15785 term net.virtualvoid.strings.Stuff.Facts.EnhancedStringsPlugin.runsAfter(e30a80d2b4700276248ce5925d94ebb97783d05d)
- 15794 term net.virtualvoid.strings.Stuff.Contact.mailingList
- 15725 term net.virtualvoid.strings.Stuff.license(e30a80d2b4700276248ce5925d94ebb97783d05d)
- 15781 type net.virtualvoid.strings.Stuff.Facts.EnhancedStringsPlugin
- 15796 term net.virtualvoid.strings.Stuff.Contact.bugTracker(e30a80d2b4700276248ce5925d94ebb97783d05d)
- 15794 term net.virtualvoid.strings.Stuff.Contact.mailingList(e30a80d2b4700276248ce5925d94ebb97783d05d)
- 15727 type net.virtualvoid.strings.Stuff.Facts
- 15792 term net.virtualvoid.strings.Stuff.Contact.authorsEmail
- 15792 term net.virtualvoid.strings.Stuff.Contact.authorsEmail(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15798 term net.virtualvoid.strings.Stuff.Contact.bugTracker
+ 15787 term net.virtualvoid.strings.Stuff.Facts.EnhancedStringsPlugin.runsAfter(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15796 term net.virtualvoid.strings.Stuff.Contact.mailingList
+ 15727 term net.virtualvoid.strings.Stuff.license(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15783 type net.virtualvoid.strings.Stuff.Facts.EnhancedStringsPlugin
+ 15798 term net.virtualvoid.strings.Stuff.Contact.bugTracker(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15796 term net.virtualvoid.strings.Stuff.Contact.mailingList(e30a80d2b4700276248ce5925d94ebb97783d05d)
+ 15729 type net.virtualvoid.strings.Stuff.Facts
+ 15794 term net.virtualvoid.strings.Stuff.Contact.authorsEmail
+ 15794 term net.virtualvoid.strings.Stuff.Contact.authorsEmail(e30a80d2b4700276248ce5925d94ebb97783d05d)
  9120 term net.virtualvoid.strings.Stuff
- 15728 type net.virtualvoid.strings.Stuff.IDEIntegration
- 15725 term net.virtualvoid.strings.Stuff.license
- 15785 term net.virtualvoid.strings.Stuff.Facts.EnhancedStringsPlugin.runsAfter
- 15730 type net.virtualvoid.strings.Stuff.Contact
- 15729 type net.virtualvoid.strings.Stuff.KnownIssues
+ 15730 type net.virtualvoid.strings.Stuff.IDEIntegration
+ 15727 term net.virtualvoid.strings.Stuff.license
+ 15787 term net.virtualvoid.strings.Stuff.Facts.EnhancedStringsPlugin.runsAfter
+ 15732 type net.virtualvoid.strings.Stuff.Contact
+ 15731 type net.virtualvoid.strings.Stuff.KnownIssues

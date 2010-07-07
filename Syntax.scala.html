@@ -27,18 +27,18 @@
   <span class="keyword">object</span> <a title="object net.virtualvoid.strings.Syntax.Expressions" id="15549">Expressions</a> <span title="ScalaObject" class="delimiter">{</span>
 
     <span class="comment">/* Expressions are introduced by the # (sharp) sign */</span>
-    <span class="keyword">val</span> <a title="Int" id="15806">x</a> = <span title="Int(5)" class="int">5</span>
-    <span class="keyword">val</span> <a title="String" id="15808">stringWithNumber</a> = &quot;<span title="java.lang.String(&quot;The number is &quot;)" class="string">The number is </span>#<a href="#15806" title="=&gt; Int">x</a><span title="java.lang.String(&quot;!&quot;)" class="string">!</span>&quot;
+    <span class="keyword">val</span> <a title="Int" id="15808">x</a> = <span title="Int(5)" class="int">5</span>
+    <span class="keyword">val</span> <a title="String" id="15810">stringWithNumber</a> = &quot;<span title="java.lang.String(&quot;The number is &quot;)" class="string">The number is </span>#<a href="#15808" title="=&gt; Int">x</a><span title="java.lang.String(&quot;!&quot;)" class="string">!</span>&quot;
 
     <span class="comment">/* With this syntax, you can access the value of a variable from
        the scope. Properties (ie methods with no parameters)
        can be accessed with the usual dot notation. */</span>
-    <span class="keyword">val</span> <a title="java.lang.String" id="15810">aString</a> = &quot;<span title="java.lang.String(&quot;test&quot;)" class="string">test</span>&quot;
-    <span class="keyword">val</span> <a title="String" id="15812">info</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>#<a href="#15810" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>&quot;
+    <span class="keyword">val</span> <a title="java.lang.String" id="15812">aString</a> = &quot;<span title="java.lang.String(&quot;test&quot;)" class="string">test</span>&quot;
+    <span class="keyword">val</span> <a title="String" id="15814">info</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>#<a href="#15812" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>&quot;
 
     <span class="comment">/* To declare unambigiously where an expression ends, put it into
        braces */</span>
-    <span class="keyword">val</span> <a title="String" id="15814">braced</a> = &quot;<span title="java.lang.String(&quot;Length: &quot;)" class="string">Length: </span>#{<a href="#15810" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>}<span title="java.lang.String(&quot;.stuff&quot;)" class="string">.stuff</span>&quot;
+    <span class="keyword">val</span> <a title="String" id="15816">braced</a> = &quot;<span title="java.lang.String(&quot;Length: &quot;)" class="string">Length: </span>#{<a href="#15812" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>}<span title="java.lang.String(&quot;.stuff&quot;)" class="string">.stuff</span>&quot;
 
     <span class="comment">// val unbraced = &quot;Length: #aString.length.stuff&quot;</span>
     <span class="comment">// error here: &quot;value stuff is not a member of Int&quot;</span>
@@ -46,7 +46,7 @@
     <span class="comment">/* Up until now, you've just seen simple expressions, the full power
        unleashes when you insert arbitrary Scala expressions into a string
        using #{{ ... }} */</span> 
-    <span class="keyword">val</span> <a title="String" id="15816">inStringCalculation</a> = &quot;<span title="java.lang.String(&quot;What is x + 5 + 12? &quot;)" class="string">What is x + 5 + 12? </span>#{{ <a href="#15806" title="(x$1: Int)Int">x</a> <span title="(x$1: Int)Int">+</span> <span title="Int(5)" class="int">5</span> + <span title="Int(12)" class="int">12</span> }}&quot;
+    <span class="keyword">val</span> <a title="String" id="15818">inStringCalculation</a> = &quot;<span title="java.lang.String(&quot;What is x + 5 + 12? &quot;)" class="string">What is x + 5 + 12? </span>#{{ <a href="#15808" title="(x$1: Int)Int">x</a> <span title="(x$1: Int)Int">+</span> <span title="Int(5)" class="int">5</span> + <span title="Int(12)" class="int">12</span> }}&quot;
   <span class="delimiter">}</span>
   
   <span class="comment">/* Not all expressions evaluate to a String value. There are some
@@ -59,14 +59,14 @@
 
        Recall the example from the last section: */</span>
 
-    <span class="keyword">val</span> <a title="java.lang.String" id="15819">aString</a> = &quot;<span title="java.lang.String(&quot;test&quot;)" class="string">test</span>&quot;
-    <span class="keyword">val</span> <a title="String" id="15821">info</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>#<a href="#15819" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>&quot;
+    <span class="keyword">val</span> <a title="java.lang.String" id="15821">aString</a> = &quot;<span title="java.lang.String(&quot;test&quot;)" class="string">test</span>&quot;
+    <span class="keyword">val</span> <a title="String" id="15823">info</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>#<a href="#15821" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>&quot;
     
-    <a href="#15819" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span> <span class="comment">/* is of type Int, so it has to be converted to a String
+    <a href="#15821" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span> <span class="comment">/* is of type Int, so it has to be converted to a String
        before it can be appended to the rest of the String. Behind the scenes,
        ScalaEnhancedStrings creates code like this: */</span>
 
-    <span class="keyword">val</span> <a title="java.lang.String" id="15823">infoAfterSeS</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>&quot;+<a href="#15819" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>.<span title="()java.lang.String">toString</span>
+    <span class="keyword">val</span> <a title="java.lang.String" id="15825">infoAfterSeS</a> = &quot;<span title="java.lang.String(&quot;aString has the length &quot;)" class="string">aString has the length </span>&quot;+<a href="#15821" title="=&gt; java.lang.String">aString</a>.<span title="()Int">length</span>.<span title="()java.lang.String">toString</span>
 
 
     <span class="comment">/* More interesting is the set of built-in conversions and the
@@ -76,16 +76,16 @@
        First, there is support for conditional string formatting with the
        conversion syntax `?[&lt;then-string&gt;|&lt;else-string&gt;]` */</span>
 
-    <span class="keyword">val</span> <a title="Boolean" id="15825">isSummer</a> = <span title="Boolean(true)" class="keyword">true</span>
-    <span class="keyword">def</span> <a title="=&gt; Unit" id="15827">proclaimTemperature</a> =
-      <span title="(x: Any)Unit">println</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;It is so &quot;)" class="string">It is so </span>#<a href="#15825" title="=&gt; Boolean">isSummer</a>?[<span title="java.lang.String(&quot;hot&quot;)" class="string">hot</span>|<span title="java.lang.String(&quot;cold&quot;)" class="string">cold</span>]&quot;<span class="delimiter">)</span>
+    <span class="keyword">val</span> <a title="Boolean" id="15827">isSummer</a> = <span title="Boolean(true)" class="keyword">true</span>
+    <span class="keyword">def</span> <a title="=&gt; Unit" id="15829">proclaimTemperature</a> =
+      <span title="(x: Any)Unit">println</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;It is so &quot;)" class="string">It is so </span>#<a href="#15827" title="=&gt; Boolean">isSummer</a>?[<span title="java.lang.String(&quot;hot&quot;)" class="string">hot</span>|<span title="java.lang.String(&quot;cold&quot;)" class="string">cold</span>]&quot;<span class="delimiter">)</span>
 
     <span class="comment">/* For */</span> <span title="object Option">Option</span><span class="comment">/*-al values the same syntax applies. In the
      &lt;then-string&gt; there is the expression #it or #this available,
      which refers to the contents of the */</span> <span title="object Option">Option</span> <span class="comment">/* value */</span>
 
-    <span class="keyword">val</span> <a title="Option[String]" id="15828">optionalBeer</a>: <span title="Option[String]">Option</span><span class="delimiter">[</span>String<span class="delimiter">]</span> = <span title="(x: java.lang.String)Some[java.lang.String]">Some</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;Rothaus&quot;)" class="string">Rothaus</span>&quot;<span class="delimiter">)</span>
-    <span class="keyword">val</span> <a title="String" id="15830">thirstyMan</a> = &quot;<span title="java.lang.String(&quot;He's drinking &quot;)" class="string">He's drinking </span>#<a href="#15828" title="=&gt; Option[String]">optionalBeer</a>?[<span title="java.lang.String(&quot;his &quot;)" class="string">his </span>#<a href="#16059" title="Any">it</a>|<span title="java.lang.String(&quot;nothing&quot;)" class="string">nothing</span>]&quot;
+    <span class="keyword">val</span> <a title="Option[String]" id="15830">optionalBeer</a>: <span title="Option[String]">Option</span><span class="delimiter">[</span>String<span class="delimiter">]</span> = <span title="(x: java.lang.String)Some[java.lang.String]">Some</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;Rothaus&quot;)" class="string">Rothaus</span>&quot;<span class="delimiter">)</span>
+    <span class="keyword">val</span> <a title="String" id="15832">thirstyMan</a> = &quot;<span title="java.lang.String(&quot;He's drinking &quot;)" class="string">He's drinking </span>#<a href="#15830" title="=&gt; Option[String]">optionalBeer</a>?[<span title="java.lang.String(&quot;his &quot;)" class="string">his </span>#<a href="#16061" title="Any">it</a>|<span title="java.lang.String(&quot;nothing&quot;)" class="string">nothing</span>]&quot;
     <span class="comment">// evaluates to &quot;He's drinking his Rothaus&quot;</span>
 
     <span class="comment">/* Then, there's support for formatting whole sequences of values (of type Iterator)
@@ -96,19 +96,27 @@
        as specified with the inner formater and then join them together
        using the separator */</span>
 
-    <span class="keyword">val</span> <a title="List[java.lang.String]" id="15832">fruit</a> = <span title="(xs: java.lang.String*)List[java.lang.String]">List</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;Apple&quot;)" class="string">Apple</span>&quot;, &quot;<span title="java.lang.String(&quot;Orange&quot;)" class="string">Orange</span>&quot;, &quot;<span title="java.lang.String(&quot;Lemon&quot;)" class="string">Lemon</span>&quot;, &quot;<span title="java.lang.String(&quot;Banana&quot;)" class="string">Banana</span>&quot;<span class="delimiter">)</span>
-    <span class="keyword">val</span> <a title="String" id="15834">breakfast</a> = &quot;<span title="java.lang.String(&quot;Today there's &quot;)" class="string">Today there's </span>#<a href="#15832" title="=&gt; List[java.lang.String]">fruit</a>[<span title="java.lang.String(&quot;the tasty &quot;)" class="string">the tasty </span>#<a href="#16276" title="java.lang.String">it</a>]{, }*<span title="java.lang.String(&quot; in my yoghurt&quot;)" class="string"> in my yoghurt</span>&quot;
+    <span class="keyword">val</span> <a title="List[java.lang.String]" id="15834">fruit</a> = <span title="(xs: java.lang.String*)List[java.lang.String]">List</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;Apple&quot;)" class="string">Apple</span>&quot;, &quot;<span title="java.lang.String(&quot;Orange&quot;)" class="string">Orange</span>&quot;, &quot;<span title="java.lang.String(&quot;Lemon&quot;)" class="string">Lemon</span>&quot;, &quot;<span title="java.lang.String(&quot;Banana&quot;)" class="string">Banana</span>&quot;<span class="delimiter">)</span>
+    <span class="keyword">val</span> <a title="String" id="15836">breakfast</a> = &quot;<span title="java.lang.String(&quot;Today there's &quot;)" class="string">Today there's </span>#<a href="#15834" title="=&gt; List[java.lang.String]">fruit</a>[<span title="java.lang.String(&quot;the tasty &quot;)" class="string">the tasty </span>#<a href="#16278" title="java.lang.String">it</a>]{, }*<span title="java.lang.String(&quot; in my yoghurt&quot;)" class="string"> in my yoghurt</span>&quot;
     <span class="comment">// == &quot;Today there's the tasty Apple, the tasty Orange ...</span>
 
     <span class="comment">/* The inner part of the last string could be rewritten as */</span>
-    <a href="#15832" title="=&gt; List[java.lang.String]">fruit</a>.<span title="(f: (java.lang.String) =&gt; java.lang.String)(implicit bf: scala.collection.generic.CanBuildFrom[List[java.lang.String],java.lang.String,List[java.lang.String]])List[java.lang.String]">map</span><span title="scala.collection.generic.CanBuildFrom[scala.collection.immutable.List.Coll,java.lang.String,List[java.lang.String]]" class="delimiter">(</span><a title="java.lang.String" id="17643">it</a> =&gt; &quot;<span title="java.lang.String(&quot;the tasty &quot;)" class="string">the tasty </span>&quot;+<a href="#17643" title="java.lang.String">it</a>.<span title="()java.lang.String">toString</span><span class="delimiter">)</span>.<span title="(sep: String)String">mkString</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;, &quot;)" class="string">, </span>&quot;<span class="delimiter">)</span>
+    <a href="#15834" title="=&gt; List[java.lang.String]">fruit</a>.<span title="(f: (java.lang.String) =&gt; java.lang.String)(implicit bf: scala.collection.generic.CanBuildFrom[List[java.lang.String],java.lang.String,List[java.lang.String]])List[java.lang.String]">map</span><span title="scala.collection.generic.CanBuildFrom[scala.collection.immutable.List.Coll,java.lang.String,List[java.lang.String]]" class="delimiter">(</span><a title="java.lang.String" id="17645">it</a> =&gt; &quot;<span title="java.lang.String(&quot;the tasty &quot;)" class="string">the tasty </span>&quot;+<a href="#17645" title="java.lang.String">it</a>.<span title="()java.lang.String">toString</span><span class="delimiter">)</span>.<span title="(sep: String)String">mkString</span><span class="delimiter">(</span>&quot;<span title="java.lang.String(&quot;, &quot;)" class="string">, </span>&quot;<span class="delimiter">)</span>
     <span class="comment">/* in fact, this is exactly what the plugin does. */</span>
   
     <span class="comment">/* You can omit the &lt;inner_formater&gt; in which case #it is assumed. You
        can omit the separator, as well, in which case the separator is the empty string. */</span>
   
-    <span class="keyword">val</span> <a title="String" id="15836">allDigits</a> = &quot;#{{<span title="(end: Int)scala.collection.immutable.Range.Inclusive with scala.collection.immutable.Range.ByOne" class="int">0</span> to <span title="Int(9)" class="int">9</span>}}*&quot; <span class="comment">// == &quot;0123456789&quot;</span>
+    <span class="keyword">val</span> <a title="String" id="15838">allDigits</a> = &quot;#{{<span title="(end: Int)scala.collection.immutable.Range.Inclusive with scala.collection.immutable.Range.ByOne" class="int">0</span> to <span title="Int(9)" class="int">9</span>}}*&quot; <span class="comment">// == &quot;0123456789&quot;</span>
 
+  <span class="delimiter">}</span>
+  
+  <span class="keyword">object</span> <a title="object net.virtualvoid.strings.Syntax.ControlCharacterEscaping" id="15553">ControlCharacterEscaping</a> <span title="ScalaObject" class="delimiter">{</span>
+    <span class="comment">/* Control characters '#', '[', ']', and '|' have to be
+       quoted with '#' if they are meant literally */</span>
+       
+    <span class="keyword">val</span> <a title="java.lang.String" id="17908">notAnExpression</a> = &quot;<span title="java.lang.String(&quot;I love C#&quot;)" class="string">I love C#</span>#&quot;
+    <span class="keyword">val</span> <a title="java.lang.String" id="17910">thisIsABar</a> = &quot;<span title="java.lang.String(&quot;|&quot;)" class="string">#</span>|&quot;
   <span class="delimiter">}</span>
 
   <span class="comment">/* next chapter: */</span> <a href="Stuff.scala.html#9120" title="object net.virtualvoid.strings.Stuff">Stuff</a>
