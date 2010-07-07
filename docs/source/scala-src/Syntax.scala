@@ -98,6 +98,15 @@ object Syntax extends ScalaEnhancedStrings {
     val allDigits = "#{{0 to 9}}*" // == "0123456789"
 
   }
+  
+  object ControlCharacterEscaping {
+    /* Control characters '#', '[', ']', and '|' have to be
+       quoted with '#' if they are meant literally. 
+       (Never mind the broken syntax highlighting here) */
+       
+    val notAnExpression = "I love C##"
+    val thisIsABar = "#|"
+  }
 
   /* next chapter: */ Stuff
 }
