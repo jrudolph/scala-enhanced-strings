@@ -29,6 +29,12 @@ object Stuff extends ScalaEnhancedStrings {
        the common features are working: error reporting, showing types, inspecting
        variables. (Only, if you make ensime compile with the plugin enabled, which
        I managed to do only by enabling it directly in ensime's sources.)
+
+       Some IDEs come with their own presentation compiler and may not know the
+       @EnhanceStrings annotation. In this case you can add the plugin jar file
+       as a dependency, it contains the annotation. (Though, this is not needed
+       for normal compilation with the plugin: The plugin deletes the annotation
+       from the source code before Scala is even noticing it.)
      */
   }
   trait KnownIssues {

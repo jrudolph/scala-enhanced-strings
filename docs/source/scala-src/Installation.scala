@@ -51,8 +51,15 @@ object Usage extends ScalaEnhancedStrings {
     val x = "The class of my parent object is: #Usage.getClass"
   }
 
+}
+
+object AtRuntime {
+  /* After compiling with scala-enhanced-strings the plugins leaves
+     no traces of itself. No additional dependency jars are needed. */
+
   /* Next chapter: */ Syntax
 }
+
 
 /* SeS - Scala Enhanced Strings
  * Copyright 2008 - 2010 Johannes Rudolph
