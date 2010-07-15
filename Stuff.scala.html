@@ -13,11 +13,11 @@
 <span class="keyword">package</span> net.virtualvoid.strings
 
 <span class="keyword">object</span> <a title="object net.virtualvoid.strings.Stuff" id="9120">Stuff</a> <span title="ScalaObject" class="keyword">extends</span> <a href="Overview.scala.html#9116" title="net.virtualvoid.strings.ScalaEnhancedStrings">ScalaEnhancedStrings</a> <span class="delimiter">{</span>
-  <span class="keyword">val</span> <a title="java.lang.String" id="15727">license</a> = &quot;<span class="string">BSD License</span>&quot;
+  <span class="keyword">val</span> <a title="java.lang.String" id="15867">license</a> = &quot;<span class="string">BSD License</span>&quot;
 
-  <span class="keyword">trait</span> <a title="trait Facts extends java.lang.Object with ScalaObject" id="15729">Facts</a> <span title="ScalaObject" class="delimiter">{</span>
-    <span class="keyword">class</span> <a title="class EnhancedStringsPlugin extends java.lang.Object with ScalaObject" id="15783">EnhancedStringsPlugin</a> <span title="ScalaObject" class="delimiter">{</span>
-      <span class="keyword">val</span> <a title="java.lang.String" id="15787">runsAfter</a> = &quot;<span class="string">parser</span>&quot;
+  <span class="keyword">trait</span> <a title="trait Facts extends java.lang.Object with ScalaObject" id="15869">Facts</a> <span title="ScalaObject" class="delimiter">{</span>
+    <span class="keyword">class</span> <a title="class EnhancedStringsPlugin extends java.lang.Object with ScalaObject" id="15923">EnhancedStringsPlugin</a> <span title="ScalaObject" class="delimiter">{</span>
+      <span class="keyword">val</span> <a title="java.lang.String" id="15927">runsAfter</a> = &quot;<span class="string">parser</span>&quot;
     <span class="delimiter">}</span>
     
     <span class="comment">/*
@@ -36,23 +36,29 @@
          currently unmaintained module which compiles a formatting
          string to bytecodes at runtime, as well.  */</span>
   <span class="delimiter">}</span>
-  <span class="keyword">trait</span> <a title="trait IDEIntegration extends java.lang.Object" id="15730">IDEIntegration</a> <span title="java.lang.Object" class="delimiter">{</span>
+  <span class="keyword">trait</span> <a title="trait IDEIntegration extends java.lang.Object" id="15870">IDEIntegration</a> <span title="java.lang.Object" class="delimiter">{</span>
     <span class="comment">/* Syntax highlighting doesn't work in IDEs. However, at least in ensime
        the common features are working: error reporting, showing types, inspecting
        variables. (Only, if you make ensime compile with the plugin enabled, which
        I managed to do only by enabling it directly in ensime's sources.)
+
+       Some IDEs come with their own presentation compiler and may not know the
+       @EnhanceStrings annotation. In this case you can add the plugin jar file
+       as a dependency, it contains the annotation. (Though, this is not needed
+       for normal compilation with the plugin: The plugin deletes the annotation
+       from the source code before Scala is even noticing it.)
      */</span>
   <span class="delimiter">}</span>
-  <span class="keyword">trait</span> <a title="trait KnownIssues extends java.lang.Object" id="15731">KnownIssues</a> <span title="java.lang.Object" class="delimiter">{</span>
+  <span class="keyword">trait</span> <a title="trait KnownIssues extends java.lang.Object" id="15871">KnownIssues</a> <span title="java.lang.Object" class="delimiter">{</span>
     <span class="comment">/*
        - The parser may a bit unreliable at the edges.
        - More conversions needed       
      */</span>
   <span class="delimiter">}</span>
-  <span class="keyword">trait</span> <a title="trait Contact extends java.lang.Object with ScalaObject" id="15732">Contact</a> <span title="ScalaObject" class="delimiter">{</span>
-    <span class="keyword">val</span> <a title="java.lang.String" id="15794">authorsEmail</a> = &quot;<span class="string">johannes.rudolph@gmail.com</span>&quot;
-    <span class="keyword">val</span> <a title="java.lang.String" id="15796">mailingList</a> = &quot;<span class="string">http://groups.google.com/group/scala-enhanced-strings</span>&quot;
-    <span class="keyword">val</span> <a title="java.lang.String" id="15798">bugTracker</a> = &quot;<span class="string">http://github.com/jrudolph/scala-enhanced-strings/issues</span>&quot;
+  <span class="keyword">trait</span> <a title="trait Contact extends java.lang.Object with ScalaObject" id="15872">Contact</a> <span title="ScalaObject" class="delimiter">{</span>
+    <span class="keyword">val</span> <a title="java.lang.String" id="15934">authorsEmail</a> = &quot;<span class="string">johannes.rudolph@gmail.com</span>&quot;
+    <span class="keyword">val</span> <a title="java.lang.String" id="15936">mailingList</a> = &quot;<span class="string">http://groups.google.com/group/scala-enhanced-strings</span>&quot;
+    <span class="keyword">val</span> <a title="java.lang.String" id="15938">bugTracker</a> = &quot;<span class="string">http://github.com/jrudolph/scala-enhanced-strings/issues</span>&quot;
   <span class="delimiter">}</span>
 
   <span class="comment">/* This documentation was formatted by Mark Harrah's sxr */</span>
