@@ -81,7 +81,7 @@ object Syntax extends ScalaEnhancedStrings {
        Inside of the <inner_formatter> you can access the current element
        by #it or #this. The asterisk '*' at the end in enhanced string syntax
        instructs the plugin to expand all these values, format each element
-       as specified with the inner formater and then join them together
+       as specified with the inner formatter and then join them together
        using the separator */
 
     val fruit = List("Apple", "Orange", "Lemon", "Banana")
@@ -92,7 +92,7 @@ object Syntax extends ScalaEnhancedStrings {
     fruit.map(it => "the tasty "+it.toString).mkString(", ")
     /* in fact, this is exactly what the plugin does. */
   
-    /* You can omit the <inner_formater> in which case #it is assumed. You
+    /* You can omit the <inner_formatter> in which case #it is assumed. You
        can omit the separator, as well, in which case the separator is the empty string. */
   
     val allDigits = "#{{0 to 9}}*" // == "0123456789"
@@ -102,7 +102,7 @@ object Syntax extends ScalaEnhancedStrings {
   object ControlCharacterEscaping {
     /* Control characters '#', '[', ']', and '|' have to be
        quoted with '#' if they are meant literally. 
-       (Never mind the broken syntax highlighting here) */
+       (Don't mind the broken syntax highlighting here) */
        
     val notAnExpression = "I love C##"
     val thisIsABar = "#|"
