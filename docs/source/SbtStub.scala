@@ -11,6 +11,11 @@ package object sbt {
     def %(next: String): String = next
     def %%(next: String): String = next
     def at(next: String): String = next
-  }  
+    def :=(a: Any) = null
+  }
+
+  var resolvers = ""
+  def autoCompilerPlugins = strHasPercentOps(null)
+  def addCompilerPlugin(str: String){}
 }
 

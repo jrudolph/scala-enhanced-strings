@@ -13,20 +13,30 @@ trait StandaloneUsage {
 }
 
 trait UseWithSBT {
-  /* See the usage example at http://github.com/jrudolph/scala-enhanced-strings/tree/master/usage
-     or here: */
-  
-  /* Starting with a normal project descriptor... */
-  import sbt._
+  if ("sbt.version" == 0.7) {
+    /* See the usage example at http://github.com/jrudolph/scala-enhanced-strings/tree/master/usage
+       or here: */
 
-  class ESUsageExample(info: ProjectInfo) 
-    extends DefaultProject(info) 
-    /* ... extend your project descriptor */
-    with AutoCompilerPlugins {
-  
-    val virtualVoid = "Virtual-Void repository" at "http://mvn.virtual-void.net"
+    /* Starting with a normal project descriptor... */
+    import sbt._
 
-    val es = compilerPlugin("net.virtualvoid" %% "scala-enhanced-strings" % "0.5.2")
+    class ESUsageExample(info: ProjectInfo)
+      extends DefaultProject(info)
+      /* ... extend your project descriptor */
+      with AutoCompilerPlugins {
+
+      val virtualVoid = "Virtual-Void repository" at "http://mvn.virtual-void.net"
+
+      val es = compilerPlugin("net.virtualvoid" %% "scala-enhanced-strings" % "0.5.2")
+    }
+  } else if ("sbt.version" >= "0.10") {
+    import sbt._
+    /* Adding this to your build configuration should work: */
+
+    resolvers += "Virtual-Void repository" at "http://mvn.virtual-void.net"
+
+    autoCompilerPlugins := true
+    addCompilerPlugin("net.virtualvoid" %% "scala-enhanced-strings" % "0.5.2")
   }
 }
 
