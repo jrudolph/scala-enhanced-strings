@@ -26,7 +26,7 @@ trait UseWithSBT {
   
     val virtualVoid = "Virtual-Void repository" at "http://mvn.virtual-void.net"
 
-    val es = compilerPlugin("net.virtualvoid" %% "scala-enhanced-strings" % "0.5.1")
+    val es = compilerPlugin("net.virtualvoid" %% "scala-enhanced-strings" % "0.5.2")
   }
 }
 
