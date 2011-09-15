@@ -6,7 +6,7 @@ package net.virtualvoid.string
 
 import _root_.org.specs._
 
-object ParserSpecs extends Specification {
+object ESParserSpecs extends Specification {
   import EnhancedStringFormatParser.parse
   import AST._
   
@@ -54,6 +54,14 @@ object ParserSpecs extends Specification {
     
     // conditionals
     "conditionals" in {"#this?[#this|Nope]" must beParsedAs(Conditional(ThisExp,toks(ToStringConversion(ThisExp)),toks(Literal("Nope"))))}
+    "conditional with empty else clause" in {
+      "#this?[#this]" must beParsedAs(
+        Conditional(
+          ThisExp,
+          toks(ToStringConversion(ThisExp)),
+          toks(Literal(""))))
+    }
+
     "complex conditionals" in {"#{x.getClass.getMethods}?[#it|None]" must beParsedAs(Conditional(
       ParentExp(ParentExp(Exp("getMethods"),"getClass"),"x")
       ,toks(ToStringConversion(Exp("it"))),toks(Literal("None"))))}

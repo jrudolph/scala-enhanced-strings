@@ -78,10 +78,14 @@ object EnhancedStringFormatParser extends RegexParsers with ESParser {
   
   def dateConversion:Parser[String] = extendParser("->date[") ~!> "[^\\]]*".r <~ "]" 
   def conversion = exp ~ dateConversion ^^ {case exp ~ format => DateConversion(exp,format)}
-  
-  def clauses = extendParser("?[") ~!> 
-    (tokens ~ "|" ~ tokens <~ "]")
-  def conditional = exp ~ clauses ^^ {case exp ~ (ifs ~ sep ~ thens) => Conditional(exp,ifs,thens)}
+
+  def optionalElseClause: Parser[FormatElementList] =
+    opt("|" ~> tokens) ^^ (_.getOrElse(FormatElementList(Seq(Literal("")))))
+
+  def clauses = extendParser("?[") ~!>
+    (tokens ~ optionalElseClause <~ "]")
+
+  def conditional = exp ~ clauses ^^ {case exp ~ (ifs ~ elses) => Conditional(exp, ifs, elses)}
 
   def innerExp:Parser[FormatElement] = (expand
                                      |  conversion 
