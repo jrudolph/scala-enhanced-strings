@@ -1,5 +1,5 @@
-SXR=/home/johannes/git/opensource/sxr/target/scala_2.8.0.RC6/sxr_2.8.0.RC6-0.2.5-SNAPSHOT.jar
-ES=../../target/scala_2.8.0.RC6/scala-enhanced-strings_2.8.0.RC6-0.5.jar
+SXR=/home/johannes/git/opensource/sxr/target/scala_2.9.1/sxr_2.9.1-0.2.5-SNAPSHOT.jar
+ES=../../target/scala_2.9.1/scala-enhanced-strings_2.9.1-0.5.2.jar
 #SBT=../../project/boot/scala-2.7.7/org.scala-tools.sbt/sbt/0.7.4/sbt_2.7.7-0.7.4.jar
 
 scalac \
@@ -9,8 +9,8 @@ scalac \
   -Xprint-pos \
   -Xprint:enhanced-strings \
   -Ylog:sxr \
-  -Ystop:pickler \
   scala-src/*.scala &&
+#  -Ystop:pickler \
   #-Yrangepos \
 #  -Xprint:enhanced-strings \
 #  -Yshow-trees \
