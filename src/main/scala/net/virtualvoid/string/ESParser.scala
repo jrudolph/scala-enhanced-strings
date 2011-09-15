@@ -48,11 +48,11 @@ object EnhancedStringFormatParser extends RegexParsers with ESParser {
 
   implicit def extendParser[T](x:Parser[T]):EParser[T] = EParser[T](x)
 
-  def escapedByDoubling(char:String):Parser[String] = "#" ~ char ^^ (x=>char)
+  def escaped(char:String):Parser[String] = "#" ~ char ^^ (x=>char)
 
   val expStartChar = '#'
 
-  def char = "[^#\\]|\\[]".r | escapedByDoubling("[") | escapedByDoubling("]") | escapedByDoubling("#") | escapedByDoubling("|")
+  def char = "[^#\\]|\\[]".r | escaped("[") | escaped("]") | escaped("#") | escaped("|")
   def chars: Parser[String] = char ~ rep(char) ^^ {case first ~ rest => first :: rest reduceLeft (_+_)}
   
   def idChar = "\\w".r
