@@ -1,0 +1,18 @@
+
+{
+ "organization":"net.virtualvoid",
+ "name":"scala-enhanced-strings",
+ "version":"0.5.2",
+ "description":"A scalac compiler plugin that adds string interpolation and more to scala.",
+ "site":"http://jrudolph.github.com/scala-enhanced-strings",
+ "tags":["compiler-plugin","string","syntax","string-interpolation"],
+ "docs":"http://jrudolph.github.com/scala-enhanced-strings",
+ "licenses": [{
+   "name": "BSD",
+   "url": "https://raw.github.com/jrudolph/scala-enhanced-strings/master/LICENSE"
+  }],
+ "resolvers": ["http://mvn.virtual-void.net"],
+ "dependencies": [],
+ "scalas": ["2.9.1"],
+ "sbt": false
+}
