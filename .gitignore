@@ -1,5 +1,5 @@
 target/
-/*.swp
+*.swp
 /.manager
 /.project
 /.classpath
@@ -7,3 +7,6 @@ target/
 /*.class
 project/boot/
 lib_managed/
+/.idea
+*.iml
+*~
