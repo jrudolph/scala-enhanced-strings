@@ -41,18 +41,18 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       def it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
 
       def compiled(els: AST.FormatElementList, pos: Position): Tree = {
-	import scala.util.parsing.input.Positional
+        import scala.util.parsing.input.Positional
         def startOf(e: Positional): Position = e.pos match {
-	  // in case, we don't have a real position, this is only an approximation
-	  case scala.util.parsing.input.NoPosition => pos.makeTransparent
-	  case _ => pos.withPoint(pos.startOrPoint + e.pos.column)
-	}
-	def positionOf(e: Positional, length: Int) = e.pos match {
-	  case scala.util.parsing.input.NoPosition => pos.makeTransparent	
-	  case _ => 
-	    val start = pos.startOrPoint + e.pos.column
-	    new scala.tools.nsc.util.RangePosition(pos.source, start, start, start + length)
-	}
+          // in case, we don't have a real position, this is only an approximation
+          case scala.util.parsing.input.NoPosition => pos.makeTransparent
+          case _ => pos.withPoint(pos.startOrPoint + e.pos.column)
+        }
+        def positionOf(e: Positional, length: Int) = e.pos match {
+          case scala.util.parsing.input.NoPosition => pos.makeTransparent
+          case _ =>
+            val start = pos.startOrPoint + e.pos.column
+            new scala.tools.nsc.util.RangePosition(pos.source, start, start, start + length)
+        }
         def compile(els: AST.FormatElementList): Tree = compiled(els, pos)
 
         def compileParentExpressionInner(inner: AST.Exp, outer: Tree): Tree = inner match {
@@ -60,11 +60,11 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
           case AST.Ident(id) => atPos(positionOf(inner, id.length))(Select(outer, id))
         }
 
-	def offsetPositionBy(pos: Position, offset: Int) = pos match {
-	  case p: scala.tools.nsc.util.RangePosition =>
-	    new scala.tools.nsc.util.RangePosition(unit.source, p.start+offset, p.start+offset, p.end+offset)
-	  case _ => pos.withSource(unit.source, offset)
-	}
+        def offsetPositionBy(pos: Position, offset: Int) = pos match {
+          case p: scala.tools.nsc.util.RangePosition =>
+            new scala.tools.nsc.util.RangePosition(unit.source, p.start+offset, p.start+offset, p.end+offset)
+          case _ => pos.withSource(unit.source, offset)
+        }
 
         def fixPos(pos: Position, tree: Tree) = {
           object PositionTreeTraverser extends Traverser {
@@ -73,7 +73,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
               super.traverse(t)
             }
           }
-          
+
           PositionTreeTraverser.traverse(tree)
           tree
         }
@@ -96,8 +96,8 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
           case AST.ToStringConversion(exp) => Select(compileExpression(exp), "toString")
           case AST.Expand(exp, sep, inner) => Apply(
             Select(
-            Apply(Select(compileExpression(exp), "map")
-            , List(Function(List(it), compile(inner)))), "mkString")
+              Apply(Select(compileExpression(exp), "map")
+                , List(Function(List(it), compile(inner)))), "mkString")
             , List(Literal(Constant(sep))))
           case AST.Conditional(cond, thenEls, elseEls) =>
             Match(Typed(compileExpression(cond), Ident("Any".toTypeName)), List(
@@ -105,7 +105,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
               CaseDef(Ident("None"), compile(elseEls)),
               CaseDef(Bind("it", Literal(Constant(true))), compile(thenEls)),
               CaseDef(Literal(Constant(false)), compile(elseEls))
-              ))
+            ))
         }}
 
         els.elements.size match {
@@ -118,7 +118,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             def appendElement(a: Tree, b: Tree) = Apply(Select(a, "append"), List(b))
 
             val appender = els.elements.map(compileElement _)
-                              .foldLeft(createInstance)(appendElement)
+              .foldLeft(createInstance)(appendElement)
 
             Apply(Select(appender, "toString"), Nil)
         }
@@ -126,14 +126,14 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
 
       /** Strip off the delimiters of a string constant's position */
       def fixPosition(pos: Position, len: Int): Position = pos match {
-	case p: scala.tools.nsc.util.RangePosition => 
-	  val start = p.start
-	  val end = p.end
-	  val lengthWithDelims = end - start
-	  val delims = (lengthWithDelims - len) / 2 - 1
-	  //println("Found delims of total length "+(lengthWithDelims - len))
-	  new scala.tools.nsc.util.RangePosition(p.source, start+delims, start+delims, end-delims)
-	case _ => pos
+        case p: scala.tools.nsc.util.RangePosition =>
+          val start = p.start
+          val end = p.end
+          val lengthWithDelims = end - start
+          val delims = (lengthWithDelims - len) / 2 - 1
+          //println("Found delims of total length "+(lengthWithDelims - len))
+          new scala.tools.nsc.util.RangePosition(p.source, start+delims, start+delims, end-delims)
+        case _ => pos
       }
 
       /** When using <code>postTransform</code>, each node is
@@ -154,16 +154,16 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       val ESType = "EnhanceStrings".toTypeName
       val SyntaxParam = "syntax".toTermName
       val VersionParam = "version".toTermName
-      
+
       val annotationMatcher: PartialFunction[Tree, List[Tree]] = { case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), args) => args }
-      
+
       def versionExtractor(cur: VersionInfo, arg: Tree): VersionInfo = arg match {
         case AssignOrNamedArg(Ident(SyntaxParam), Literal(Constant(flavor: String))) => cur.copy(flavor = flavor)
         case AssignOrNamedArg(Ident(SyntaxParam), c@Literal(Constant(flavor))) => error(c.pos, "The "+SyntaxParam+" attribute of "+ESType+" must be a String value"); cur
 
         case AssignOrNamedArg(Ident(VersionParam), Literal(Constant(version: Int))) => cur.copy(version = version)
         case AssignOrNamedArg(Ident(VersionParam), c@Literal(Constant(version))) => error(c.pos, "The "+VersionParam+" attribute of "+ESType+" must be an integer value"); cur
-        
+
         case _ => error(arg.pos, "Unknown parameter of "+ESType+": "+arg); cur
       }
 
@@ -178,10 +178,10 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       var parser: Option[ESParser] = None
 
       def withMods(tree: Tree, newMods: Modifiers): Tree = tree match {
-	case d: DefDef    => d.copy(mods = newMods)
-	case m: ModuleDef => m.copy(mods = newMods)
-	case c: ClassDef  => c.copy(mods = newMods)
-	case _            => tree
+        case d: DefDef    => d.copy(mods = newMods)
+        case m: ModuleDef => m.copy(mods = newMods)
+        case c: ClassDef  => c.copy(mods = newMods)
+        case _            => tree
       }
       override def transform(tree: Tree): Tree = tree match {
         case m: MemberDef =>
@@ -190,14 +190,14 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
           newVersion match {
             case Some(v) =>
               val oldParser = parser
-              
+
               parser = ParserFactory.parser(v)
               if (!parser.isDefined)
                 error(tree.pos, "EnhancedString syntax with version "+v+" not found.")
-              
+
               //println("Version now " + v)
               val res = super.transform(tree)
-              
+
               parser = oldParser
               atPos(tree.pos)(withMods(res, newMods))
             case None =>

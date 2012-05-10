@@ -9,7 +9,7 @@ import scala.util.parsing.input.Positional
 object AST{
   trait FormatElement extends Positional {
     def format(o:AnyRef):String
-  }  
+  }
   case class Literal(str:String) extends FormatElement{
     def chars = str
     def format(o:AnyRef):String = str
@@ -39,12 +39,12 @@ object AST{
     import Java.it2it
     def format(o:AnyRef) = exp.eval(o) match{
       // array or collection or similar
-    case l: java.lang.Iterable[_] => realEval(l.asInstanceOf[java.lang.Iterable[AnyRef]])
-    case l: Iterable[_] => realEval(l.asInstanceOf[Iterable[AnyRef]])
-    case a: Array[AnyRef] => realEval(a)
+      case l: java.lang.Iterable[_] => realEval(l.asInstanceOf[java.lang.Iterable[AnyRef]])
+      case l: Iterable[_] => realEval(l.asInstanceOf[Iterable[AnyRef]])
+      case a: Array[AnyRef] => realEval(a)
     }
   }
-  
+
   trait Exp extends Positional {
     def eval(o: AnyRef): AnyRef
   }
@@ -54,21 +54,21 @@ object AST{
     import java.lang.reflect.{Method}
     import java.lang.NoSuchMethodException
     def findMethod(c:Class[_],name:String):Option[Method] =
-     try {
-       val res = c.getMethod(name)
-       res.setAccessible(true)
-       Some(res)
-     }catch{
-     case e:NoSuchMethodException => None
-     }
-    def realmethod(cl:Class[_]):Method = 
+      try {
+        val res = c.getMethod(name)
+        res.setAccessible(true)
+        Some(res)
+      }catch{
+        case e:NoSuchMethodException => None
+      }
+    def realmethod(cl:Class[_]):Method =
       Array("get"+capitalize(identifier),identifier)
         .flatMap(findMethod(cl,_).toList).headOption
         .getOrElse(throw new java.lang.Error("couldn't find method " + identifier + " in class "+cl.getName+" methods: "+cl.getMethods.map(_.getName).mkString(", ")))
     var m:Method = null
     def method(cl:Class[_]) = {
       if (m == null){
-    	  m = realmethod(cl)
+        m = realmethod(cl)
       }
       m
     }
@@ -85,14 +85,14 @@ object AST{
     def returnType(callingCl:Class[_]):Class[_] = callingCl
     def genericReturnType(callingCl:Class[_]):java.lang.reflect.Type =
       throw new java.lang.Error("No generic type information available for "+callingCl.getName+
-                                  " since it is erased. #this can't be used in conditional or expand expressions")
+        " since it is erased. #this can't be used in conditional or expand expressions")
   }
   case class ParentExp(inner:Exp, parent: String) extends Exp {
     override def eval(o:AnyRef) = inner.eval(Ident(parent).eval(o))
   }
-  
+
   case class FormatElementList(elements:Seq[FormatElement]){
-    def format(o:AnyRef):String = elements.map(_.format(o)) mkString "" 
+    def format(o:AnyRef):String = elements.map(_.format(o)) mkString ""
   }
 }
 

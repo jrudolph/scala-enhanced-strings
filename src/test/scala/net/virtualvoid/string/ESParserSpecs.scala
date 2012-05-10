@@ -9,7 +9,7 @@ import _root_.org.specs._
 object ESParserSpecs extends Specification {
   import EnhancedStringFormatParser.parse
   import AST._
-  
+
   // for legacy reasons
   def Exp(str: String) = Ident(str)
 
@@ -27,7 +27,7 @@ object ESParserSpecs extends Specification {
     "#this" in {"#this" must beParsedAs(ThisExp)}
     "#{this}" in {"#{this}" must beParsedAs(ThisExp)}
     "#this[]*" in {"#this[]*" must beParsedAs(expand(ThisExp,""))}
-    
+
     // literal Scala expressions
     "#{{test.it.is}}" in {"#{{test.it.is}}" must beParsedAs(ScalaExp("test.it.is"))}
     "#{{test.it.is}}*" in {"#{{test.it.is}} *" must beParsedAs(ToStringConversion(ScalaExp("test.it.is")), Literal(" *"))}
@@ -48,10 +48,10 @@ object ESParserSpecs extends Specification {
 
     "Curly Braces somewhere in between 'This is {braced}'" in {"This is {braced}" must beParsedAs(Literal("This is {braced}"))}
     "question mark after expression" in {"Who lives at #address?" must beParsedAs(Literal("Who lives at "),ToStringConversion(Exp("address")),Literal("?"))}
-    
+
     // conversions
     "date conversion" in {"#this->date[dd.MM.yyyy]" must beParsedAs(DateConversion(ThisExp,"dd.MM.yyyy"))}
-    
+
     // conditionals
     "conditionals" in {"#this?[#this|Nope]" must beParsedAs(Conditional(ThisExp,toks(ToStringConversion(ThisExp)),toks(Literal("Nope"))))}
     "conditional with empty else clause" in {
@@ -79,7 +79,7 @@ object ESParserSpecs extends Specification {
     }
   }
   def beParsedAs(ts:Exp):Matcher[String] = beParsedAs(ToStringConversion(ts))
-  
+
   def expand(e:Exp,sep:String,inner:FormatElement*) = Expand(e,sep,toks(inner:_*))
   def toks(inner:FormatElement*) = FormatElementList(List(inner:_*))
 

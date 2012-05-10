@@ -23,13 +23,13 @@ object EvaluateSpecs extends Specification{
     def transactions():Array[Transaction] = Array(Transaction(new GregorianCalendar(2008,OCTOBER,1),5),Transaction(new GregorianCalendar(2008,OCTOBER,3),-4))
   }
   class Person{
-      def name():java.lang.String = "Joe"
-      def accountNames():java.util.List[java.lang.String] = java.util.Arrays.asList("a","b")
-      val sparkasse = Bank("Sparkasse")
-      def accounts():java.util.List[Account] = java.util.Arrays.asList(Account("78910",sparkasse),Account("12345",Bank("Volksbank")))
-      def accs():Array[Account] = accounts().toArray(new Array[Account](0))
-      def noAddress:Option[String] = None
-      def address:Option[String] = Some("Some Street 5")
+    def name():java.lang.String = "Joe"
+    def accountNames():java.util.List[java.lang.String] = java.util.Arrays.asList("a","b")
+    val sparkasse = Bank("Sparkasse")
+    def accounts():java.util.List[Account] = java.util.Arrays.asList(Account("78910",sparkasse),Account("12345",Bank("Volksbank")))
+    def accs():Array[Account] = accounts().toArray(new Array[Account](0))
+    def noAddress:Option[String] = None
+    def address:Option[String] = Some("Some Street 5")
   }
   val thePerson = new Person
 
