@@ -8,7 +8,6 @@ import scala.util.parsing.input.Reader
 import scala.util.parsing.combinator._
 import scala.util.parsing.combinator.lexical._
 import scala.util.parsing.combinator.syntactical._
-import scala.util.parsing.syntax._
 
 object Java{
   implicit def it2it[T](it:java.lang.Iterable[T]):Iterable[T] = new Iterable[T] {
@@ -61,8 +60,8 @@ object EnhancedStringFormatParser extends RegexParsers with ESParser {
   def idPart:Parser[String] = idChar ~ rep(idChar) ^^ {case first ~ rest => first :: rest mkString ""}
   def id:Parser[Exp] = positioned(
     "this" 					^^ {str => ThisExp} |
-    idPart ~ opt("." ~> id) ^^ {case str ~ Some(inner) => ParentExp(inner, str)
-                                case str ~ None => Ident(str)})
+      idPart ~ opt("." ~> id) ^^ {case str ~ Some(inner) => ParentExp(inner, str)
+      case str ~ None => Ident(str)})
 
   def endOrChars: Parser[String] = not(literal("}}")) ~ char ^^ { case x ~ ch => "" + ch }
   def scalaExpBody: Parser[ScalaExp] = endOrChars ~ rep(endOrChars) ^^ { case first ~ rest => ScalaExp(first :: rest mkString "") }
@@ -88,10 +87,10 @@ object EnhancedStringFormatParser extends RegexParsers with ESParser {
   def conditional = exp ~ clauses ^^ {case exp ~ (ifs ~ elses) => Conditional(exp, ifs, elses)}
 
   def innerExp:Parser[FormatElement] = (expand
-                                     |  conversion 
-                                     |  conditional
-                                     |  expAsString
-                                     |  lit)
+    |  conversion
+    |  conditional
+    |  expAsString
+    |  lit)
   def inners = '[' ~> tokens <~ ']'
 
   def tokens:Parser[FormatElementList] = rep(innerExp) ^^ {case toks => FormatElementList(toks)}
@@ -100,10 +99,10 @@ object EnhancedStringFormatParser extends RegexParsers with ESParser {
 
   case class EParser[T](oldThis:Parser[T]){
     def ~!> [U](p: => Parser[U]): Parser[U]
-      = OnceParser{ (for(a <- oldThis; b <- commit(p)) yield b).named("~!>") }
+    = OnceParser{ (for(a <- oldThis; b <- commit(p)) yield b).named("~!>") }
 
     def <~! [U](p: => Parser[U]): Parser[T]
-      = OnceParser{ (for(a <- oldThis; b <- commit(p)) yield a).named("<~!") }
+    = OnceParser{ (for(a <- oldThis; b <- commit(p)) yield a).named("<~!") }
   }
 
   def parse(input:String):FormatElementList =

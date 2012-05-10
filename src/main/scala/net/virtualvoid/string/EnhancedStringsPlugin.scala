@@ -38,7 +38,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       localTyper = analyzer.newTyper(analyzer.rootContext(unit, EmptyTree, false))
       import unit.error
 
-      def it = ValDef(Modifiers(Flags.PARAM), "it", TypeTree(), EmptyTree)
+      def it = ValDef(Modifiers(Flags.PARAM), newTermName("it"), TypeTree(), EmptyTree)
 
       def compiled(els: AST.FormatElementList, pos: Position): Tree = {
         import scala.util.parsing.input.Positional
@@ -100,10 +100,10 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
                 , List(Function(List(it), compile(inner)))), "mkString")
             , List(Literal(Constant(sep))))
           case AST.Conditional(cond, thenEls, elseEls) =>
-            Match(Typed(compileExpression(cond), Ident("Any".toTypeName)), List(
-              CaseDef(Apply(Ident("Some"), List(Bind("it", Ident("_")))), compile(thenEls)),
+            Match(Typed(compileExpression(cond), Ident(newTypeName("Any"))), List(
+              CaseDef(Apply(Ident("Some"), List(Bind(newTermName("it"), Ident("_")))), compile(thenEls)),
               CaseDef(Ident("None"), compile(elseEls)),
-              CaseDef(Bind("it", Literal(Constant(true))), compile(thenEls)),
+              CaseDef(Bind(newTermName("it"), Literal(Constant(true))), compile(thenEls)),
               CaseDef(Literal(Constant(false)), compile(elseEls))
             ))
         }}
@@ -114,7 +114,7 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
           case _ =>
             // the general case:
             // compile into new StringBuilder().append(a).append(b).[...].append(z).toString
-            val createInstance: Tree = Apply(Select(New(Ident("StringBuilder".toTypeName)), nme.CONSTRUCTOR), Nil)
+            val createInstance: Tree = Apply(Select(New(Ident(newTypeName("StringBuilder"))), nme.CONSTRUCTOR), Nil)
             def appendElement(a: Tree, b: Tree) = Apply(Select(a, "append"), List(b))
 
             val appender = els.elements.map(compileElement _)
@@ -146,14 +146,14 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
             atPos(tree.pos.makeTransparent)(compiled(parser.get.parse(str), fixPosition(tree.pos, str.length)))
           } catch {
             case p: ParseException => p.printStackTrace; unit.error(tree.pos, p.getMessage); tree
-            case e: TypeError => localTyper.reportTypeError(tree.pos, e); tree
+            case e: TypeError => localTyper.reportTypeError(localTyper.context, tree.pos, e); tree
           }
         case _ => tree
       }
 
-      val ESType = "EnhanceStrings".toTypeName
-      val SyntaxParam = "syntax".toTermName
-      val VersionParam = "version".toTermName
+      val ESType = newTypeName("EnhanceStrings")
+      val SyntaxParam = newTermName("syntax")
+      val VersionParam = newTermName("version")
 
       val annotationMatcher: PartialFunction[Tree, List[Tree]] = { case Apply(Select(New(Ident(ESType)), nme.CONSTRUCTOR), args) => args }
 
@@ -168,10 +168,10 @@ class EnhancedStringsPlugin(val global: Global) extends Plugin {
       }
 
       def extractVersion(m: Modifiers): (Modifiers, Option[VersionInfo]) = m match {
-        case Modifiers(a, b, anns, d) =>
+        case m@Modifiers(_, _, anns) =>
           val (args, rest) = anns.partition(annotationMatcher.isDefinedAt _)
 
-          (Modifiers(a, b, rest, d), args.headOption.map(annotationMatcher).map(args => args.foldLeft(ParserFactory.defaultVersion)(versionExtractor)))
+          (m.copy(annotations = rest), args.headOption.map(annotationMatcher).map(args => args.foldLeft(ParserFactory.defaultVersion)(versionExtractor)))
         case _ => (m, None)
       }
 

@@ -36,10 +36,10 @@ object AST{
   case class Expand(exp:Exp,sep:String,inner:FormatElementList) extends FormatElement{
     //def chars = exp.chars + ":" + sep
     def realEval(l:Iterable[AnyRef]):String = l.map(inner.format(_)) mkString sep
-    import Java.it2it
+    import collection.JavaConverters._
     def format(o:AnyRef) = exp.eval(o) match{
       // array or collection or similar
-      case l: java.lang.Iterable[_] => realEval(l.asInstanceOf[java.lang.Iterable[AnyRef]])
+      case l: java.lang.Iterable[_] => realEval(l.asInstanceOf[java.lang.Iterable[AnyRef]].asScala)
       case l: Iterable[_] => realEval(l.asInstanceOf[Iterable[AnyRef]])
       case a: Array[AnyRef] => realEval(a)
     }
