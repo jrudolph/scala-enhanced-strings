@@ -12,7 +12,7 @@ import nsc.plugins.PluginComponent
 import nsc.transform.{ Transform, TypingTransformers }
 import nsc.symtab.Flags
 
-final class OriginalString(final val string: String) extends StaticAnnotation {}
+final class OriginalString(final val string: String) extends annotation.StaticAnnotation {}
 
 class EnhancedStringsPlugin(val global: Global) extends Plugin {
   import global._

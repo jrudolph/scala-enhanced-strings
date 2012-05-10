@@ -32,4 +32,5 @@ scalacOptions in (Compile, console) <+= (packageBin in Compile) map { bin =>
 
 scalaVersion := "2.10.0-M3"
 
+scalacOptions in Compile ++= Seq("-Xmacros")
 
