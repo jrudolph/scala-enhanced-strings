@@ -1,8 +1,8 @@
-organization := "net.virtualvoid"
+organization := "net.virtual-void"
 
 name := "scala-enhanced-strings"
 
-version := "0.5.2"
+version := "0.6.0"
 
 homepage := Some(url("http://jrudolph.github.com/scala-enhanced-strings"))
 
