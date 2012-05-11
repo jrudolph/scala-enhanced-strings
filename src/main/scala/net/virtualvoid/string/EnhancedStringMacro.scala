@@ -78,8 +78,8 @@ object EnhancedStringMacro {
         }
       }
       def compileParentExpressionInner[T](inner: AST.Exp, outer: Tree): Expr[T] = inner match {
-        case AST.ParentExp(inner, parent) =>
-          at(positionOf(inner, parent.length))(compileParentExpressionInner(inner, Select(outer, parent)))
+        case p@AST.ParentExp(inner, parent) =>
+          compileParentExpressionInner(inner, atPos(positionOf(p, parent.length))(Select(outer, parent)))
         case AST.Ident(id) =>
           at(positionOf(inner, id.length))(Expr(Select(outer, id)))
       }
