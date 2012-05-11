@@ -2,7 +2,7 @@ organization := "net.virtual-void"
 
 name := "scala-enhanced-strings"
 
-version := "0.6.0"
+version := "0.6.0-SNAPSHOT"
 
 homepage := Some(url("http://jrudolph.github.com/scala-enhanced-strings"))
 
