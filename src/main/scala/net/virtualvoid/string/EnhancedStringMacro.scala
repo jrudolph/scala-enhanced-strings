@@ -5,13 +5,14 @@ import scala.util.parsing.input.Positional
 
 object EnhancedStringMacro {
   def enhance(c: Context { type PrefixType = WithIP } ): c.Expr[String] = {
-    import c.mirror._
+    import c.Expr
+    import c.universe._
 
     lazy val optionTpe = implicitly[TypeTag[Option[Any]]].tpe
     lazy val booleanTpe = implicitly[TypeTag[Boolean]].tpe
 
     case class RichPos(p: Position) {
-      def trans(f: Position => scala.reflect.api.Position): Position = f(p).asInstanceOf[Position]
+      def trans(f: Position => scala.reflect.api.PositionApi): Position = f(p).asInstanceOf[Position]
     }
     implicit def toRichPos(p: Position): RichPos = RichPos(p)
 
@@ -35,17 +36,17 @@ object EnhancedStringMacro {
       def compileElement(el: AST.FormatElement): Expr[String] = at(startOf(el)) { el match {
         case AST.Literal(str) =>
           at(positionOf(el, str.length)) {
-            c.reify(c.literal(str).eval)
+            c.reify(c.literal(str).splice)
           }
 
         case AST.ToStringConversion(exp) =>
-          c.reify(compileExpression(exp).eval.toString)
+          c.reify(compileExpression(exp).splice.toString)
 
         case AST.Expand(exp, sep, inner) =>
           c.reify(
-            compileExpression[Traversable[Any]](exp).eval
-              .map(it => compile(inner).eval)
-              .mkString(c.literal(sep).eval))
+            compileExpression[Traversable[Any]](exp).splice
+              .map(it => compile(inner).splice)
+              .mkString(c.literal(sep).splice))
 
         case AST.Conditional(cond, thenEls, elseEls) =>
           val compiledCond = compileExpression(cond)
@@ -57,9 +58,9 @@ object EnhancedStringMacro {
           val elseExpr = compile(elseEls)
 
           if (condTpe <:< optionTpe)
-            c.reify(condExpr[Option[Any]].eval.fold(elseExpr.eval)(it => thenExpr.eval))
+            c.reify(condExpr[Option[Any]].splice.fold(elseExpr.splice)(it => thenExpr.splice))
           else if (condTpe =:= booleanTpe)
-            c.reify(if (condExpr[Boolean].eval) thenExpr.eval else elseExpr.eval)
+            c.reify(if (condExpr[Boolean].splice) thenExpr.splice else elseExpr.splice)
           else {
             c.error(pos, "Conditional expression has to be of type Option or Boolean")
             c.reify("<error>")
@@ -91,16 +92,16 @@ object EnhancedStringMacro {
           // the general case:
           // compile into new StringBuilder().append(a).append(b).[...].append(z).toString
           val createInstance: Expr[StringBuilder] = c.reify(new StringBuilder())
-          def appendElement(a: Expr[StringBuilder], b: Expr[Any]) = c.reify(a.eval.append(b.eval))
+          def appendElement(a: Expr[StringBuilder], b: Expr[Any]) = c.reify(a.splice.append(b.splice))
 
           val appender = els.elements.map(compileElement(_))
             .foldLeft(createInstance)(appendElement(_, _))
 
-          c.reify(appender.eval.toString)
+          c.reify(appender.splice.toString)
         }
     }
 
-    val Apply(_, (lit@c.mirror.Literal(c.mirror.Constant(string: String))) :: Nil) = c.prefix.tree
+    val Apply(_, (lit@c.universe.Literal(c.universe.Constant(string: String))) :: Nil) = c.prefix.tree
 
     val parsed = EnhancedStringFormatParser.parse(string)
 

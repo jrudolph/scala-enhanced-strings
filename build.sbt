@@ -30,7 +30,7 @@ scalacOptions in (Compile, console) <+= (packageBin in Compile) map { bin =>
 //(description in LsKeys.lsync) :=
 //  "A scalac compiler plugin that adds string interpolation and more to scala."
 
-scalaVersion := "2.10.0-M3"
+resolvers += "snaps" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
-scalacOptions in Compile ++= Seq("-Xmacros")
+scalaVersion := "2.10.0-SNAPSHOT"
 
