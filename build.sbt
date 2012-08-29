@@ -10,7 +10,7 @@ licenses in GlobalScope += "BSD" -> url("https://raw.github.com/jrudolph/scala-e
 
 libraryDependencies += "org.scala-tools.testing" % "specs_2.9.0-1" % "1.6.8" % "test"
 
-libraryDependencies <+= scalaVersion ("org.scala-lang" % "scala-compiler" % _)
+libraryDependencies <+= scalaVersion ("org.scala-lang" % "scala-compiler" % _ % "provided")
 
 scalacOptions ++= Seq("-unchecked", "-deprecation")
 
@@ -32,5 +32,5 @@ scalacOptions in (Compile, console) <+= (packageBin in Compile) map { bin =>
 
 resolvers += "snaps" at "https://oss.sonatype.org/content/repositories/snapshots/"
 
-scalaVersion := "2.10.0-SNAPSHOT"
+scalaVersion := "2.10.0-M7"
 

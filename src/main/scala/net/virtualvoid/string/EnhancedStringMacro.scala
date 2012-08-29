@@ -1,6 +1,6 @@
 package net.virtualvoid.string
 
-import reflect.makro._
+import reflect.macros._
 import scala.util.parsing.input.Positional
 
 object EnhancedStringMacro {
@@ -36,14 +36,14 @@ object EnhancedStringMacro {
       def compileElement(el: AST.FormatElement): Expr[String] = at(startOf(el)) { el match {
         case AST.Literal(str) =>
           at(positionOf(el, str.length)) {
-            c.reify(c.literal(str).splice)
+            reify(c.literal(str).splice)
           }
 
         case AST.ToStringConversion(exp) =>
-          c.reify(compileExpression(exp).splice.toString)
+          reify(compileExpression(exp).splice.toString)
 
         case AST.Expand(exp, sep, inner) =>
-          c.reify(
+          reify(
             compileExpression[Traversable[Any]](exp).splice
               .map(it => compile(inner).splice)
               .mkString(c.literal(sep).splice))
@@ -58,12 +58,12 @@ object EnhancedStringMacro {
           val elseExpr = compile(elseEls)
 
           if (condTpe <:< optionTpe)
-            c.reify(condExpr[Option[Any]].splice.fold(elseExpr.splice)(it => thenExpr.splice))
+            reify(condExpr[Option[Any]].splice.fold(elseExpr.splice)(it => thenExpr.splice))
           else if (condTpe =:= booleanTpe)
-            c.reify(if (condExpr[Boolean].splice) thenExpr.splice else elseExpr.splice)
+            reify(if (condExpr[Boolean].splice) thenExpr.splice else elseExpr.splice)
           else {
             c.error(pos, "Conditional expression has to be of type Option or Boolean")
-            c.reify("<error>")
+            reify("<error>")
           }
       }}
       def compileExpression[T](exp: AST.Exp): Expr[T] = /*atPos(startOf(exp))*/ {
@@ -72,10 +72,11 @@ object EnhancedStringMacro {
           case AST.ParentExp(inner, parent) =>
             compileParentExpressionInner[T](inner, atPos(positionOf(exp, parent.length))(Ident(parent)))
 
-          // parsing not yet supported
-          //case AST.ScalaExp(scalaExp) =>
-            //fixPos(startOf(exp), parse(scalaExp, startOf(exp)))
-          case AST.Ident(identifier) => at(positionOf(exp, identifier.length))(Expr[T](Ident(identifier)))
+           //parsing not yet supported
+          /*case AST.ScalaExp(scalaExp) =>
+            fixPos(startOf(exp), parse(scalaExp, startOf(exp)))*/
+          case AST.Ident(identifier) =>
+            at(positionOf(exp, identifier.length))(Expr[T](Ident(identifier)))
         }
       }
       def compileParentExpressionInner[T](inner: AST.Exp, outer: Tree): Expr[T] = inner match {
@@ -86,18 +87,18 @@ object EnhancedStringMacro {
       }
 
       els.elements.size match {
-        case 0 => c.reify("")
+        case 0 => reify("")
         case 1 => compileElement(els.elements(0))
         case _ =>
           // the general case:
           // compile into new StringBuilder().append(a).append(b).[...].append(z).toString
-          val createInstance: Expr[StringBuilder] = c.reify(new StringBuilder())
-          def appendElement(a: Expr[StringBuilder], b: Expr[Any]) = c.reify(a.splice.append(b.splice))
+          val createInstance: Expr[StringBuilder] = reify(new StringBuilder())
+          def appendElement(a: Expr[StringBuilder], b: Expr[Any]) = reify(a.splice.append(b.splice))
 
           val appender = els.elements.map(compileElement(_))
             .foldLeft(createInstance)(appendElement(_, _))
 
-          c.reify(appender.splice.toString)
+          reify(appender.splice.toString)
         }
     }
 
