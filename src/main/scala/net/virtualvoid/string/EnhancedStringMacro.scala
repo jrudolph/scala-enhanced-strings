@@ -72,9 +72,9 @@ object EnhancedStringMacro {
           case AST.ParentExp(inner, parent) =>
             compileParentExpressionInner[T](inner, atPos(positionOf(exp, parent.length))(Ident(parent)))
 
-           //parsing not yet supported
-          /*case AST.ScalaExp(scalaExp) =>
-            fixPos(startOf(exp), parse(scalaExp, startOf(exp)))*/
+          case AST.ScalaExp(scalaExp) =>
+            Expr[T](c.parse(scalaExp))
+
           case AST.Ident(identifier) =>
             at(positionOf(exp, identifier.length))(Expr[T](Ident(identifier)))
         }
